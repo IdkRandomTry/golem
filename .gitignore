@@ -1,0 +1,37 @@
+# Generated files from lex/yacc
+lex.yy.c
+y.tab.c
+y.tab.h
+
+# Compiled executables
+golem
+
+# Object files
+*.o
+*.obj
+
+# Output files
+output.txt
+
+# Editor files
+*.swp
+*.swo
+*~
+.vscode/
+.vs/
+
+# OS-specific
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Build artifacts
+*.exe
+*.out
+*.a
+*.so
+*.dylib
+
+# Backup files
+*.bak
+*.tmp
