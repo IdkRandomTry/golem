@@ -1,3 +1,18 @@
+# Updates:
+- VS Code extension YASH is good
+- basic lexer implemented
+- single basic test case passed
+- code for "comments" added needs testng
+- in general can have more testing
+- what is to be submitted anyways? doc or just code?
+- the .y file does nothing rn. only needed it to define the keywords
+
+# Imp commands
+- use wsl
+- use `make clean && make test`
+- `make test` runs predefined list of test cases, hardcoded in makefile
+- `make` for simply compiling
+
 # GOLEM Language Specification
 
 # Grid-Oriented Logic for Entity Manipulation
