@@ -1,0 +1,9 @@
+grid(3, 3) {}
+
+blueprint mover {
+    go 1;
+}
+
+construct {
+    spawn mover at (0, 0);
+}
