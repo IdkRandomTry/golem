@@ -85,13 +85,13 @@ static void comment(void)
                 return;
 
             if (c == 0)
-                break;
+                break; // EOF reached but comment not closed
         }
     yyerror("unterminated comment");
 }
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Lexer error: %s\n", s);
+    fprintf(stderr, "[LEXER ERROR]: %s\n", s);
 }
 
 int main(int argc, char **argv) {
