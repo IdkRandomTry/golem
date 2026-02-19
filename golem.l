@@ -10,7 +10,10 @@ WS  [ \t\v\n\f]
 #include "tokens.h"
 
 static void comment(void);
+void yyerror(const char *s);
 %}
+
+%option nounput
 
 %%
 "/*"					{ comment(); }
@@ -35,7 +38,7 @@ static void comment(void);
 "east"					{ return(EAST); }
 "west"					{ return(WEST); }
 "true"					{ return(TRUE); }
-"false"					{ return(FALSE); }
+"false"					{ return(FALSE); } /* [FLAG: Add keyword] Add keyword token here as needed */
 
 {ID}					{ return(IDENTIFIER); }
 

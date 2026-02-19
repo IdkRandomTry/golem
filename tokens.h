@@ -42,6 +42,7 @@ static inline const char* token2string(int token) {
         case '(': return "LPAREN";
         case ')': return "RPAREN";
         case '?': return "QUERY";
+        // [FLAG: Add keyword] Add token to string mapping here as needed
         default: return "UNKNOWN";
     }
 }

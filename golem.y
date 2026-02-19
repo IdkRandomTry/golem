@@ -17,10 +17,10 @@ int yylex(void);
 %token EQ_OP NE_OP
 
 %%
+// [FLAG: Add keyword] declare token here
 
-/* Skeleton grammar - minimal rules for A2 */
+// Skeleton grammar - minimal rules 
 program:
-	/* empty */
 	| program statement
 	;
 
@@ -36,7 +36,6 @@ grid_decl:
 	;
 
 obstacle_list:
-	/* empty */
 	| obstacle_list obstacle_stmt
 	;
 
@@ -53,7 +52,6 @@ construct_decl:
 	;
 
 spawn_list:
-	/* empty */
 	| spawn_list spawn_stmt
 	;
 
@@ -63,7 +61,6 @@ spawn_stmt:
 	;
 
 stmt_list:
-	/* empty */
 	| stmt_list stmt
 	;
 

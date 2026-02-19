@@ -6,7 +6,6 @@ YACC = bison -y -d
 TARGET = golem
 LEXER = golem.l
 PARSER = golem.y
-TESTCASE_DIR = "test case"
 
 all: $(TARGET)
 
@@ -22,7 +21,9 @@ lex.yy.c: $(LEXER) y.tab.h
 
 test: $(TARGET)
 	@echo "Testing lexer with spawn-and-move.golem..."
-	./$(TARGET) $(TESTCASE_DIR)/spawn-and-move.golem
+	./$(TARGET) < test-case/spawn-and-move.golem
+	@echo "Testing lexer with comments.golem..."
+	./$(TARGET) < test-case/comments.golem
 
 clean:
 	rm -f $(TARGET) lex.yy.c y.tab.c y.tab.h
