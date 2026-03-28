@@ -1,0 +1,11 @@
+grid(5, 5) {}
+
+blueprint neg_move {
+    go 3;
+    go -2;
+    go 0;
+}
+
+construct {
+    spawn neg_move at (0, 0);
+}

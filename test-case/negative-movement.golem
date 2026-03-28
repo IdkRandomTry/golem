@@ -1,0 +1,20 @@
+// Test negative numbers in go statements
+grid(20, 20) {
+    obstacle(5, 5);
+}
+
+blueprint neg_tester {
+    go 5;           // Normal: move 5 steps forward
+    go -0;          // Should be interpreted as 0 (no movement)
+    go -3;          // Turn 180, move 3 steps forward, face that direction
+    go 2 + 3;       // Normal: move 5 steps forward
+    go 10 - 15;     // Result is -5: turn 180, move 5 steps forward
+    go 4 * 2;       // Normal: move 8 steps
+    go 20 / 4;      // Normal: move 5 steps
+    go 10 / -2;     // Result is -5: turn 180, move 5 steps
+}
+
+construct {
+    spawn neg_tester at (0, 0);
+    spawn neg_tester at (2, 3);
+}

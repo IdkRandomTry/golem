@@ -35,6 +35,10 @@ static inline const char* token2string(int token) {
         case SOUTH_SCAN: return "SOUTH_SCAN";
         case EQ_OP: return "EQ_OP";
         case NE_OP: return "NE_OP";
+        case PLUS: return "PLUS";
+        case MINUS: return "MINUS";
+        case MULTIPLY: return "MULTIPLY";
+        case DIVIDE: return "DIVIDE";
         case ';': return "SEMICOLON";
         case '{': return "LBRACE";
         case '}': return "RBRACE";

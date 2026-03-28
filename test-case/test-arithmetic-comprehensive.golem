@@ -1,0 +1,54 @@
+// Comprehensive test for arithmetic operations in GOLEM
+// Tests: addition, subtraction, multiplication, integer division
+
+grid(20, 20) {
+    // Grid created with arithmetic expressions
+    obstacle(10, 10);
+    obstacle(5 + 3, 7);
+    obstacle(15 - 2, 8);
+    obstacle(2 * 5, 12);
+    obstacle(16 / 2, 14);
+}
+
+blueprint arithmetic_walker {
+    // Test arithmetic in movement
+    go 5;
+    go 3 + 2;        // 5
+    go 10 - 3;       // 7
+    go 2 * 4;        // 8
+    go 20 / 4;       // 5 (integer division)
+
+    turn south;
+
+    // Test arithmetic in repetition
+    repeat 3 {
+        go 1;
+    }
+
+    repeat 2 + 1 {
+        go 2;
+    }
+
+    repeat 10 / 2 {
+        go 1;
+    }
+}
+
+blueprint complex_arithmetic {
+    // Complex expressions with multiple operations
+    go 2 + 3 * 2;    // 8 (multiplication has higher precedence)
+    go 10 - 2 - 2;   // 6 (left associative)
+    go 2 * 3 * 2;    // 12
+    go 16 / 2 / 4;   // 2 (left associative, 16/2=8, 8/4=2)
+
+    // Expressions with parentheses
+    go (2 + 3) * 2;  // 10
+    go 20 / (2 + 2); // 5
+}
+
+construct {
+    spawn arithmetic_walker at (0, 0);
+    spawn arithmetic_walker at (1 + 1, 2 * 2);
+    spawn complex_arithmetic at (5, 5);
+    spawn complex_arithmetic at (10 - 2, 8 + 4);
+}

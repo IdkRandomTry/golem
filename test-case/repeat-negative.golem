@@ -1,0 +1,11 @@
+grid(5, 5) {}
+
+blueprint test_repeat {
+    repeat -3 {
+        go 1;
+    }
+}
+
+construct {
+    spawn test_repeat at (0, 0);
+}

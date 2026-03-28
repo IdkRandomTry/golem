@@ -90,6 +90,13 @@ true, false Boolean literals.
 != Inequality comparison.
 ? Marks a directional operand as a scan query.
 
+### 3.2a Arithmetic Operators
+
++ Addition
+- Subtraction
+* Multiplication
+/ Integer Division (result is always integer, truncated toward zero)
+
 ### 3.3 Directional Symbols
 
 ```
@@ -111,6 +118,43 @@ vv South scan shorthand
 
 - Integer values
 - String literals for optional logging
+
+### 3.7 Arithmetic Expressions
+
+Arithmetic expressions evaluate to integers and can be used in:
+- Grid dimensions: `grid(10, 20)`
+- Movement: `go 5 + 3;`, `go 2 * 4;`
+- Repetition: `repeat 10 / 2 { ... }`
+- Coordinates (grid, obstacles, spawn): `at (2 * 3, 4 + 1)`
+
+Operator precedence (highest to lowest):
+1. Parentheses `( )`
+2. Unary minus `-` (right-associative)
+3. Multiplication `*` and Division `/` (left-associative)
+4. Addition `+` and Subtraction `-` (left-associative)
+
+### 3.8 Negative Numbers
+
+When a negative integer appears in a `go` statement:
+- If the value is exactly 0 (e.g., `-0` or `0 - 0`), the golem does not move
+- If the value is negative (e.g., `-5`, `3 - 10`), the golem:
+  1. Turns 180° from its current direction
+  2. Moves forward by the absolute value of the number
+  3. Ends facing the reversed direction
+
+Examples:
+```
+go -5;          // Turn 180° and move 5 steps in that direction
+go 3 - 8;       // Evaluates to -5: turn 180° and move 5 steps
+go -0;          // No movement (zero case)
+```
+
+**Constraints:**
+- Negative values are **NOT allowed** in:
+  - Grid dimensions: `grid(-5, 10)` → Parse error
+  - Obstacle coordinates: `obstacle(-2, 3)` → Parse error
+  - Spawn coordinates: `spawn bot at (-1, 2)` → Parse error
+- Repeat counts must be non-negative: `repeat -3 { }` → Parse error
 
 ## 4 Program Structure
 
@@ -257,6 +301,57 @@ drop gold;
 
 construct {
 spawn collector at (1,1);
+}
+```
+
+### 10.4 Arithmetic Operations
+
+```
+grid(20, 20) {
+obstacle(5 + 3, 7);
+obstacle(15 - 2, 8);
+}
+
+blueprint arithmetic_walker {
+go 2 + 3;      // move 5 steps
+go 10 / 2;     // move 5 steps (integer division)
+repeat 2 * 3 { // repeat 6 times
+  go 1;
+}
+turn south;
+go (2 + 1) * 3; // move 9 steps (parentheses for grouping)
+}
+
+construct {
+spawn arithmetic_walker at (1 + 1, 2);
+spawn arithmetic_walker at (10 - 3, 15 / 3);
+}
+```
+
+### 10.5 Negative Movement (Reverse Direction)
+
+```
+grid(10, 10) {}
+
+blueprint reverser {
+// Move forward
+go 3;
+
+// Move backward by turning 180° and stepping forward
+go -2;
+
+// Using arithmetic that results in negative
+go 1 - 6;     // Evaluates to -5: turn 180° and move 5 steps
+
+// Combination with conditionals
+repeat 2 {
+  go 4;
+  go -2;  // Back up 2 steps
+}
+}
+
+construct {
+spawn reverser at (0, 0);
 }
 ```
 ## 11 Conclusion

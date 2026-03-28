@@ -1,0 +1,20 @@
+// Test arithmetic operations
+grid(10, 10) {
+    obstacle(2, 3);
+    obstacle(3 + 1 * 8, 4);
+}
+
+blueprint walker {
+    go 5;
+    go 3 - 1;
+    turn east;
+    go -4 * 2;
+    turn south;
+    go 10 / 2;
+}
+
+construct {
+    spawn walker at (0, 0);
+    spawn walker at (1 + 1, 2);
+    spawn walker at (2 * 3, 4 / 2);
+}

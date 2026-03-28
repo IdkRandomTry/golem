@@ -11,7 +11,7 @@ all: $(TARGET)
 
 $(TARGET): y.tab.h
 	$(LEX) $(LEXER)
-	$(CC) $(CFLAGS) -o $(TARGET) lex.yy.c -ll
+	$(CC) $(CFLAGS) -o $(TARGET) lex.yy.c y.tab.c -ll
 
 y.tab.c y.tab.h: $(PARSER)
 	$(YACC) $(PARSER)
@@ -24,6 +24,9 @@ test: $(TARGET)
 	./$(TARGET) < test-case/spawn-and-move.golem
 	@echo "Testing lexer with comments.golem..."
 	./$(TARGET) < test-case/comments.golem
+	@echo "Testing parser with arithmetic.golem..."
+	./$(TARGET) < test-case/arithmetic.golem
+
 
 clean:
 	rm -f $(TARGET) lex.yy.c y.tab.c y.tab.h

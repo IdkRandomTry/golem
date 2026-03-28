@@ -6,11 +6,13 @@ WS  [ \t\v\n\f]
 
 %{
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 #include "y.tab.h"
 #include "tokens.h"
 
 static void comment(void);
-void yyerror(const char *s);
+extern void yyerror(const char *s);
 %}
 
 %option nounput
@@ -40,19 +42,23 @@ void yyerror(const char *s);
 "true"					{ return(TRUE); }
 "false"					{ return(FALSE); } /* [FLAG: Add keyword] Add keyword token here as needed */
 
-{ID}					{ return(IDENTIFIER); }
+{ID}					{ yylval.sval = strdup(yytext); return(IDENTIFIER); }
 
-{D}+					{ return(INTEGER); }
+{D}+					{ yylval.ival = atoi(yytext); return(INTEGER); }
 
-\"[^\"]*\"				{ return(STRING_LITERAL); }
+\"[^\"]*\"				{ yylval.sval = strdup(yytext); return(STRING_LITERAL); }
 
 ">>"					{ return(EAST_SCAN); }
-"<<"					{ return(WEST_SCAN); }
+[<][<]					{ return(WEST_SCAN); }
 "^^"					{ return(NORTH_SCAN); }
 "vv"					{ return(SOUTH_SCAN); }
 
 "=="					{ return(EQ_OP); }
 "!="					{ return(NE_OP); }
+"+"					{ return(PLUS); }
+"-"					{ return(MINUS); }
+"*"					{ return(MULTIPLY); }
+"/"					{ return(DIVIDE); }
 ";"					{ return ';'; }
 "{"					{ return '{'; }
 "}"					{ return '}'; }
@@ -90,15 +96,9 @@ static void comment(void)
     yyerror("unterminated comment");
 }
 
-void yyerror(const char *s) {
-    fprintf(stderr, "[LEXER ERROR]: %s\n", s);
-}
-
 int main(int argc, char **argv) {
-    int token;
-    int token_count = 0;
     FILE *input_file;
-    
+
     if (argc > 1) {
         input_file = fopen(argv[1], "r");
         if (!input_file) {
@@ -107,28 +107,23 @@ int main(int argc, char **argv) {
         }
         yyin = input_file;
     } else {
-        printf("Reading from stdin (Ctrl+D to end):\n");
         yyin = stdin;
     }
-    
-    printf("GOLEM Lexical Analyzer - Token Stream:\n");
-    printf("======================================\n\n");
-    
-    while ((token = yylex()) != 0) {
-        token_count++;
-        printf("%-3d: %-20s", token_count, token2string(token));
-        if (token == IDENTIFIER || token == INTEGER || token == STRING_LITERAL) {
-            printf(" (%s)", yytext);
-        }
-        printf("\n");
-    }
-    
-    printf("\n======================================\n");
-    printf("Total tokens: %d\n", token_count);
-    
-    if (argc > 1) {
+
+    printf("GOLEM Parser\n");
+    printf("============\n\n");
+
+    int result = yyparse();
+
+    if (input_file) {
         fclose(input_file);
     }
-    
-    return 0;
+
+    if (result == 0) {
+        printf("\n============\nParsing successful!\n");
+        return 0;
+    } else {
+        printf("\n============\nParsing failed!\n");
+        return 1;
+    }
 }
