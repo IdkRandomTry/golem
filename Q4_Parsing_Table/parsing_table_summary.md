@@ -1,0 +1,81 @@
+# Parsing Table Summary
+
+- Number of states: 128
+- ACTION columns: 47
+- GOTO columns: 23
+
+## ACTION Columns
+
+- $default
+- $end
+- '('
+- ')'
+- ','
+- ';'
+- '?'
+- '{'
+- '}'
+- AS
+- AT
+- BLUEPRINT
+- CONSTRUCT
+- DIVIDE
+- DROP
+- EAST
+- EAST_SCAN
+- ELSE
+- EMPTY
+- EQ_OP
+- FALSE
+- GO
+- GRID
+- IDENTIFIER
+- IF
+- INTEGER
+- MINUS
+- MODULO
+- MULTIPLY
+- NE_OP
+- NORTH
+- NORTH_SCAN
+- OBSTACLE
+- PICK
+- PLUS
+- REPEAT
+- SCAN
+- SOUTH
+- SOUTH_SCAN
+- SPAWN
+- THEN
+- TRUE
+- TURN
+- UMINUS
+- WEST
+- WEST_SCAN
+- error
+
+## GOTO Columns
+
+- blueprint_decl
+- compound_stmt
+- condition
+- conditional_stmt
+- construct_decl
+- direction
+- directional_scan
+- drop_stmt
+- expr
+- grid_decl
+- movement_stmt
+- obstacle_list
+- obstacle_stmt
+- pick_stmt
+- program
+- repetition_stmt
+- rotation_stmt
+- scan_result
+- spawn_list
+- spawn_stmt
+- statement
+- stmt
+- stmt_list

@@ -42,8 +42,7 @@ extern void yyerror(const char *s);
 "east"					{ return(EAST); }
 "west"					{ return(WEST); }
 "true"					{ return(TRUE); }
-"false"					{ return(FALSE); }
-"empty"					{ return(EMPTY); } /* [FLAG: Add keyword] Add keyword token here as needed */
+"false"					{ return(FALSE); } /* [FLAG: Add keyword] Add keyword token here as needed */
 
 {ID}					{ yylval.sval = strdup(yytext); return(IDENTIFIER); }
 

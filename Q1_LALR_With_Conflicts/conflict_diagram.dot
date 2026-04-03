@@ -1,0 +1,57 @@
+digraph LALR_Conflict_Focus {
+  rankdir=LR;
+  node [shape=box, fontname="Courier", fontsize=11];
+  edge [fontname="Courier", fontsize=10];
+  
+  // Legend
+  subgraph cluster_legend {
+    label="Legend";
+    style=dashed;
+    normal [label="Normal State", style="solid", color="black"];
+    conflict [label="Conflict State", style="bold", color="red"];
+  }
+  
+  // Initial states
+  s0 [label="State 0\n$accept → • program $end\nprogram → •"];
+  s1 [label="State 1\n$accept → program • $end\nprogram → program • statement"];
+  s2 [label="State 2 (Accept)\n$accept → program $end •", shape=doublecircle];
+  
+  // Statement parsing
+  s43 [label="State 43\nIF → •"];
+  s45 [label="State 45\n'{' → •"];
+  
+  // Intermediate states leading to conflict
+  s_cond [label="State X\nconditional_stmt:\n  IF '(' condition ')' • '{' stmt_list '}'"];
+  s_block1 [label="State Y\nstmt_block:\n  '{' • stmt_list '}'"];
+  s_block2 [label="State Z\nstmt_list → • stmt\nstmt_list → •"];
+  
+  // THE CONFLICT STATE
+  s117 [label="State 117 *** CONFLICT ***\n\nItems:\n[26] stmt_block → '{' stmt_list '}' •\n[31] conditional_stmt → IF '(' condition ')' '{' stmt_list '}' •\n\nREDUCE/REDUCE CONFLICT\n8 conflicts on:\nGO, TURN, PICK, DROP, IF, REPEAT, '{', '}'", 
+        style="bold,filled", fillcolor="pink", color="red", fontsize=10];
+  
+  // Transitions
+  s0 -> s1 [label="program"];
+  s1 -> s2 [label="$end\n(accept)"];
+  s1 -> s43 [label="IF"];
+  s1 -> s45 [label="'{'"];
+  
+  s43 -> s_cond [label="'(' condition ')'"];
+  s_cond -> s117 [label="'{' stmt_list '}'", color="red", style="bold"];
+  
+  s45 -> s_block1 [label=""];
+  s_block1 -> s_block2 [label="stmt_list"];
+  s_block2 -> s117 [label="'}'", color="red", style="bold"];
+  
+  // Annotations
+  note1 [shape=note, label="Path 1:\nParsing IF statement\nwith braced body", fillcolor="lightyellow", style="filled"];
+  note2 [shape=note, label="Path 2:\nParsing standalone\nstatement block", fillcolor="lightblue", style="filled"];
+  
+  s_cond -> note1 [style=dashed, dir=none];
+  s_block2 -> note2 [style=dashed, dir=none];
+  
+  // Conflict explanation
+  explanation [shape=box, label="CONFLICT EXPLANATION:\n\nBoth paths end with the pattern '{' stmt_list '}'\n\nWhen lookahead is GO, TURN, PICK, DROP, IF, REPEAT, '{', or '}',\nthe parser cannot determine:\n  • Reduce by rule 26 (stmt_block)?\n  • Reduce by rule 31 (conditional_stmt)?\n\nBison chooses rule 26 (appears first in grammar)\nThis makes rule 31 unreachable", 
+             fillcolor="lightgray", style="filled", fontsize=9];
+  
+  s117 -> explanation [style=dashed, dir=none];
+}

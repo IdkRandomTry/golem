@@ -1,0 +1,24 @@
+// Test file with various errors for error diagnostics
+
+// Error 1: Missing semicolon
+grid(5, 5) {}
+
+// Error 2: Negative grid dimensions
+grid(-10, 20) {}
+
+// Error 3: Invalid spawn syntax
+construct {
+    spawn robot1 (5, 5);  // Missing 'at' keyword
+}
+
+// Error 4: Division by zero
+blueprint test {
+    go (10 / 0);
+}
+
+// Error 5: Negative repeat count
+blueprint test2 {
+    repeat -5 {
+        go 10;
+    }
+}

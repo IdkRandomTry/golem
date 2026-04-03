@@ -1,0 +1,1475 @@
+Terminals unused in grammar
+
+    TRUE
+    FALSE
+    STRING_LITERAL
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: ε
+    2        | program statement
+
+    3 statement: grid_decl
+    4          | blueprint_decl
+    5          | construct_decl
+    6          | ';'
+
+    7 grid_decl: GRID '(' expr ',' expr ')' '{' obstacle_list '}'
+
+    8 obstacle_list: ε
+    9              | obstacle_list obstacle_stmt
+
+   10 obstacle_stmt: OBSTACLE '(' expr ',' expr ')' ';'
+
+   11 blueprint_decl: BLUEPRINT IDENTIFIER '{' stmt_list '}'
+
+   12 construct_decl: CONSTRUCT '{' spawn_list '}'
+
+   13 spawn_list: ε
+   14           | spawn_list spawn_stmt
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT '(' expr ',' expr ')' ';'
+   16           | SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' ';'
+
+   17 stmt_list: ε
+   18          | stmt_list stmt
+
+   19 stmt: movement_stmt
+   20     | rotation_stmt
+   21     | pick_stmt
+   22     | drop_stmt
+   23     | conditional_stmt
+   24     | repetition_stmt
+   25     | compound_stmt
+
+   26 compound_stmt: '{' stmt_list '}'
+
+   27 movement_stmt: GO expr ';'
+
+   28 rotation_stmt: TURN direction ';'
+
+   29 pick_stmt: PICK IDENTIFIER ';'
+
+   30 drop_stmt: DROP IDENTIFIER ';'
+
+   31 conditional_stmt: IF '(' condition ')' stmt
+   32                 | IF '(' condition ')' stmt ELSE stmt
+
+   33 repetition_stmt: REPEAT expr compound_stmt
+   34                | REPEAT compound_stmt
+   35                | REPEAT expr ';'
+
+   36 condition: SCAN '(' direction '?' ')' EQ_OP scan_result
+   37          | SCAN '(' direction '?' ')' NE_OP scan_result
+   38          | directional_scan EQ_OP scan_result
+   39          | directional_scan NE_OP scan_result
+
+   40 directional_scan: EAST_SCAN
+   41                 | WEST_SCAN
+   42                 | NORTH_SCAN
+   43                 | SOUTH_SCAN
+
+   44 scan_result: OBSTACLE
+   45            | EMPTY
+
+   46 direction: NORTH
+   47          | SOUTH
+   48          | EAST
+   49          | WEST
+
+   50 expr: INTEGER
+   51     | expr PLUS expr
+   52     | expr MINUS expr
+   53     | MINUS expr
+   54     | expr MULTIPLY expr
+   55     | expr DIVIDE expr
+   56     | expr MODULO expr
+   57     | '(' expr ')'
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    '(' (40) 7 10 15 16 31 32 36 37 57
+    ')' (41) 7 10 15 16 31 32 36 37 57
+    ',' (44) 7 10 15 16
+    ';' (59) 6 10 15 16 27 28 29 30 35
+    '?' (63) 36 37
+    '{' (123) 7 11 12 26
+    '}' (125) 7 11 12 26
+    error (256)
+    GRID (258) 7
+    OBSTACLE (259) 10 44
+    BLUEPRINT (260) 11
+    CONSTRUCT (261) 12
+    SPAWN (262) 15 16
+    AT (263) 15 16
+    AS (264) 16
+    GO (265) 27
+    TURN (266) 28
+    SCAN (267) 36 37
+    PICK (268) 29
+    DROP (269) 30
+    IF (270) 31 32
+    ELSE (271) 32
+    REPEAT (272) 33 34 35
+    THEN (273)
+    NORTH (274) 46
+    SOUTH (275) 47
+    EAST (276) 48
+    WEST (277) 49
+    TRUE (278)
+    FALSE (279)
+    EMPTY (280) 45
+    EAST_SCAN (281) 40
+    WEST_SCAN (282) 41
+    NORTH_SCAN (283) 42
+    SOUTH_SCAN (284) 43
+    EQ_OP (285) 36 38
+    NE_OP (286) 37 39
+    PLUS (287) 51
+    MINUS (288) 52 53
+    MULTIPLY (289) 54
+    DIVIDE (290) 55
+    MODULO (291) 56
+    INTEGER <ival> (292) 50
+    IDENTIFIER <sval> (293) 11 15 16 29 30
+    STRING_LITERAL <sval> (294)
+    UMINUS (295)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (48)
+        on left: 0
+    program (49)
+        on left: 1 2
+        on right: 0 2
+    statement (50)
+        on left: 3 4 5 6
+        on right: 2
+    grid_decl (51)
+        on left: 7
+        on right: 3
+    obstacle_list (52)
+        on left: 8 9
+        on right: 7 9
+    obstacle_stmt (53)
+        on left: 10
+        on right: 9
+    blueprint_decl (54)
+        on left: 11
+        on right: 4
+    construct_decl (55)
+        on left: 12
+        on right: 5
+    spawn_list (56)
+        on left: 13 14
+        on right: 12 14
+    spawn_stmt (57)
+        on left: 15 16
+        on right: 14
+    stmt_list (58)
+        on left: 17 18
+        on right: 11 18 26
+    stmt (59)
+        on left: 19 20 21 22 23 24 25
+        on right: 18 31 32
+    compound_stmt (60)
+        on left: 26
+        on right: 25 33 34
+    movement_stmt (61)
+        on left: 27
+        on right: 19
+    rotation_stmt (62)
+        on left: 28
+        on right: 20
+    pick_stmt (63)
+        on left: 29
+        on right: 21
+    drop_stmt (64)
+        on left: 30
+        on right: 22
+    conditional_stmt (65)
+        on left: 31 32
+        on right: 23
+    repetition_stmt (66)
+        on left: 33 34 35
+        on right: 24
+    condition (67)
+        on left: 36 37 38 39
+        on right: 31 32
+    directional_scan (68)
+        on left: 40 41 42 43
+        on right: 38 39
+    scan_result (69)
+        on left: 44 45
+        on right: 36 37 38 39
+    direction (70)
+        on left: 46 47 48 49
+        on right: 28 36 37
+    expr <ival> (71)
+        on left: 50 51 52 53 54 55 56 57
+        on right: 7 10 15 16 27 33 35 51 52 53 54 55 56 57
+
+
+State 0
+
+    0 $accept: • program $end
+
+    $default  reduce using rule 1 (program)
+
+    program  go to state 1
+
+
+State 1
+
+    0 $accept: program • $end
+    2 program: program • statement
+
+    $end       shift, and go to state 2
+    GRID       shift, and go to state 3
+    BLUEPRINT  shift, and go to state 4
+    CONSTRUCT  shift, and go to state 5
+    ';'        shift, and go to state 6
+
+    statement       go to state 7
+    grid_decl       go to state 8
+    blueprint_decl  go to state 9
+    construct_decl  go to state 10
+
+
+State 2
+
+    0 $accept: program $end •
+
+    $default  accept
+
+
+State 3
+
+    7 grid_decl: GRID • '(' expr ',' expr ')' '{' obstacle_list '}'
+
+    '('  shift, and go to state 11
+
+
+State 4
+
+   11 blueprint_decl: BLUEPRINT • IDENTIFIER '{' stmt_list '}'
+
+    IDENTIFIER  shift, and go to state 12
+
+
+State 5
+
+   12 construct_decl: CONSTRUCT • '{' spawn_list '}'
+
+    '{'  shift, and go to state 13
+
+
+State 6
+
+    6 statement: ';' •
+
+    $default  reduce using rule 6 (statement)
+
+
+State 7
+
+    2 program: program statement •
+
+    $default  reduce using rule 2 (program)
+
+
+State 8
+
+    3 statement: grid_decl •
+
+    $default  reduce using rule 3 (statement)
+
+
+State 9
+
+    4 statement: blueprint_decl •
+
+    $default  reduce using rule 4 (statement)
+
+
+State 10
+
+    5 statement: construct_decl •
+
+    $default  reduce using rule 5 (statement)
+
+
+State 11
+
+    7 grid_decl: GRID '(' • expr ',' expr ')' '{' obstacle_list '}'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 17
+
+
+State 12
+
+   11 blueprint_decl: BLUEPRINT IDENTIFIER • '{' stmt_list '}'
+
+    '{'  shift, and go to state 18
+
+
+State 13
+
+   12 construct_decl: CONSTRUCT '{' • spawn_list '}'
+
+    $default  reduce using rule 13 (spawn_list)
+
+    spawn_list  go to state 19
+
+
+State 14
+
+   53 expr: MINUS • expr
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 20
+
+
+State 15
+
+   50 expr: INTEGER •
+
+    $default  reduce using rule 50 (expr)
+
+
+State 16
+
+   57 expr: '(' • expr ')'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 21
+
+
+State 17
+
+    7 grid_decl: GRID '(' expr • ',' expr ')' '{' obstacle_list '}'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ','       shift, and go to state 27
+
+
+State 18
+
+   11 blueprint_decl: BLUEPRINT IDENTIFIER '{' • stmt_list '}'
+
+    $default  reduce using rule 17 (stmt_list)
+
+    stmt_list  go to state 28
+
+
+State 19
+
+   12 construct_decl: CONSTRUCT '{' spawn_list • '}'
+   14 spawn_list: spawn_list • spawn_stmt
+
+    SPAWN  shift, and go to state 29
+    '}'    shift, and go to state 30
+
+    spawn_stmt  go to state 31
+
+
+State 20
+
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   53     | MINUS expr •
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    $default  reduce using rule 53 (expr)
+
+
+State 21
+
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+   57     | '(' expr • ')'
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ')'       shift, and go to state 32
+
+
+State 22
+
+   51 expr: expr PLUS • expr
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 33
+
+
+State 23
+
+   52 expr: expr MINUS • expr
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 34
+
+
+State 24
+
+   54 expr: expr MULTIPLY • expr
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 35
+
+
+State 25
+
+   55 expr: expr DIVIDE • expr
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 36
+
+
+State 26
+
+   56 expr: expr MODULO • expr
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 37
+
+
+State 27
+
+    7 grid_decl: GRID '(' expr ',' • expr ')' '{' obstacle_list '}'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 38
+
+
+State 28
+
+   11 blueprint_decl: BLUEPRINT IDENTIFIER '{' stmt_list • '}'
+   18 stmt_list: stmt_list • stmt
+
+    GO      shift, and go to state 39
+    TURN    shift, and go to state 40
+    PICK    shift, and go to state 41
+    DROP    shift, and go to state 42
+    IF      shift, and go to state 43
+    REPEAT  shift, and go to state 44
+    '{'     shift, and go to state 45
+    '}'     shift, and go to state 46
+
+    stmt              go to state 47
+    compound_stmt     go to state 48
+    movement_stmt     go to state 49
+    rotation_stmt     go to state 50
+    pick_stmt         go to state 51
+    drop_stmt         go to state 52
+    conditional_stmt  go to state 53
+    repetition_stmt   go to state 54
+
+
+State 29
+
+   15 spawn_stmt: SPAWN • IDENTIFIER AT '(' expr ',' expr ')' ';'
+   16           | SPAWN • IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' ';'
+
+    IDENTIFIER  shift, and go to state 55
+
+
+State 30
+
+   12 construct_decl: CONSTRUCT '{' spawn_list '}' •
+
+    $default  reduce using rule 12 (construct_decl)
+
+
+State 31
+
+   14 spawn_list: spawn_list spawn_stmt •
+
+    $default  reduce using rule 14 (spawn_list)
+
+
+State 32
+
+   57 expr: '(' expr ')' •
+
+    $default  reduce using rule 57 (expr)
+
+
+State 33
+
+   51 expr: expr • PLUS expr
+   51     | expr PLUS expr •
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+
+    $default  reduce using rule 51 (expr)
+
+
+State 34
+
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   52     | expr MINUS expr •
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+
+    $default  reduce using rule 52 (expr)
+
+
+State 35
+
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   54     | expr MULTIPLY expr •
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    $default  reduce using rule 54 (expr)
+
+
+State 36
+
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   55     | expr DIVIDE expr •
+   56     | expr • MODULO expr
+
+    $default  reduce using rule 55 (expr)
+
+
+State 37
+
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+   56     | expr MODULO expr •
+
+    $default  reduce using rule 56 (expr)
+
+
+State 38
+
+    7 grid_decl: GRID '(' expr ',' expr • ')' '{' obstacle_list '}'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ')'       shift, and go to state 56
+
+
+State 39
+
+   27 movement_stmt: GO • expr ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 57
+
+
+State 40
+
+   28 rotation_stmt: TURN • direction ';'
+
+    NORTH  shift, and go to state 58
+    SOUTH  shift, and go to state 59
+    EAST   shift, and go to state 60
+    WEST   shift, and go to state 61
+
+    direction  go to state 62
+
+
+State 41
+
+   29 pick_stmt: PICK • IDENTIFIER ';'
+
+    IDENTIFIER  shift, and go to state 63
+
+
+State 42
+
+   30 drop_stmt: DROP • IDENTIFIER ';'
+
+    IDENTIFIER  shift, and go to state 64
+
+
+State 43
+
+   31 conditional_stmt: IF • '(' condition ')' stmt
+   32                 | IF • '(' condition ')' stmt ELSE stmt
+
+    '('  shift, and go to state 65
+
+
+State 44
+
+   33 repetition_stmt: REPEAT • expr compound_stmt
+   34                | REPEAT • compound_stmt
+   35                | REPEAT • expr ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+    '{'      shift, and go to state 45
+
+    compound_stmt  go to state 66
+    expr           go to state 67
+
+
+State 45
+
+   26 compound_stmt: '{' • stmt_list '}'
+
+    $default  reduce using rule 17 (stmt_list)
+
+    stmt_list  go to state 68
+
+
+State 46
+
+   11 blueprint_decl: BLUEPRINT IDENTIFIER '{' stmt_list '}' •
+
+    $default  reduce using rule 11 (blueprint_decl)
+
+
+State 47
+
+   18 stmt_list: stmt_list stmt •
+
+    $default  reduce using rule 18 (stmt_list)
+
+
+State 48
+
+   25 stmt: compound_stmt •
+
+    $default  reduce using rule 25 (stmt)
+
+
+State 49
+
+   19 stmt: movement_stmt •
+
+    $default  reduce using rule 19 (stmt)
+
+
+State 50
+
+   20 stmt: rotation_stmt •
+
+    $default  reduce using rule 20 (stmt)
+
+
+State 51
+
+   21 stmt: pick_stmt •
+
+    $default  reduce using rule 21 (stmt)
+
+
+State 52
+
+   22 stmt: drop_stmt •
+
+    $default  reduce using rule 22 (stmt)
+
+
+State 53
+
+   23 stmt: conditional_stmt •
+
+    $default  reduce using rule 23 (stmt)
+
+
+State 54
+
+   24 stmt: repetition_stmt •
+
+    $default  reduce using rule 24 (stmt)
+
+
+State 55
+
+   15 spawn_stmt: SPAWN IDENTIFIER • AT '(' expr ',' expr ')' ';'
+   16           | SPAWN IDENTIFIER • AS IDENTIFIER AT '(' expr ',' expr ')' ';'
+
+    AT  shift, and go to state 69
+    AS  shift, and go to state 70
+
+
+State 56
+
+    7 grid_decl: GRID '(' expr ',' expr ')' • '{' obstacle_list '}'
+
+    '{'  shift, and go to state 71
+
+
+State 57
+
+   27 movement_stmt: GO expr • ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ';'       shift, and go to state 72
+
+
+State 58
+
+   46 direction: NORTH •
+
+    $default  reduce using rule 46 (direction)
+
+
+State 59
+
+   47 direction: SOUTH •
+
+    $default  reduce using rule 47 (direction)
+
+
+State 60
+
+   48 direction: EAST •
+
+    $default  reduce using rule 48 (direction)
+
+
+State 61
+
+   49 direction: WEST •
+
+    $default  reduce using rule 49 (direction)
+
+
+State 62
+
+   28 rotation_stmt: TURN direction • ';'
+
+    ';'  shift, and go to state 73
+
+
+State 63
+
+   29 pick_stmt: PICK IDENTIFIER • ';'
+
+    ';'  shift, and go to state 74
+
+
+State 64
+
+   30 drop_stmt: DROP IDENTIFIER • ';'
+
+    ';'  shift, and go to state 75
+
+
+State 65
+
+   31 conditional_stmt: IF '(' • condition ')' stmt
+   32                 | IF '(' • condition ')' stmt ELSE stmt
+
+    SCAN        shift, and go to state 76
+    EAST_SCAN   shift, and go to state 77
+    WEST_SCAN   shift, and go to state 78
+    NORTH_SCAN  shift, and go to state 79
+    SOUTH_SCAN  shift, and go to state 80
+
+    condition         go to state 81
+    directional_scan  go to state 82
+
+
+State 66
+
+   34 repetition_stmt: REPEAT compound_stmt •
+
+    $default  reduce using rule 34 (repetition_stmt)
+
+
+State 67
+
+   33 repetition_stmt: REPEAT expr • compound_stmt
+   35                | REPEAT expr • ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ';'       shift, and go to state 83
+    '{'       shift, and go to state 45
+
+    compound_stmt  go to state 84
+
+
+State 68
+
+   18 stmt_list: stmt_list • stmt
+   26 compound_stmt: '{' stmt_list • '}'
+
+    GO      shift, and go to state 39
+    TURN    shift, and go to state 40
+    PICK    shift, and go to state 41
+    DROP    shift, and go to state 42
+    IF      shift, and go to state 43
+    REPEAT  shift, and go to state 44
+    '{'     shift, and go to state 45
+    '}'     shift, and go to state 85
+
+    stmt              go to state 47
+    compound_stmt     go to state 48
+    movement_stmt     go to state 49
+    rotation_stmt     go to state 50
+    pick_stmt         go to state 51
+    drop_stmt         go to state 52
+    conditional_stmt  go to state 53
+    repetition_stmt   go to state 54
+
+
+State 69
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT • '(' expr ',' expr ')' ';'
+
+    '('  shift, and go to state 86
+
+
+State 70
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS • IDENTIFIER AT '(' expr ',' expr ')' ';'
+
+    IDENTIFIER  shift, and go to state 87
+
+
+State 71
+
+    7 grid_decl: GRID '(' expr ',' expr ')' '{' • obstacle_list '}'
+
+    $default  reduce using rule 8 (obstacle_list)
+
+    obstacle_list  go to state 88
+
+
+State 72
+
+   27 movement_stmt: GO expr ';' •
+
+    $default  reduce using rule 27 (movement_stmt)
+
+
+State 73
+
+   28 rotation_stmt: TURN direction ';' •
+
+    $default  reduce using rule 28 (rotation_stmt)
+
+
+State 74
+
+   29 pick_stmt: PICK IDENTIFIER ';' •
+
+    $default  reduce using rule 29 (pick_stmt)
+
+
+State 75
+
+   30 drop_stmt: DROP IDENTIFIER ';' •
+
+    $default  reduce using rule 30 (drop_stmt)
+
+
+State 76
+
+   36 condition: SCAN • '(' direction '?' ')' EQ_OP scan_result
+   37          | SCAN • '(' direction '?' ')' NE_OP scan_result
+
+    '('  shift, and go to state 89
+
+
+State 77
+
+   40 directional_scan: EAST_SCAN •
+
+    $default  reduce using rule 40 (directional_scan)
+
+
+State 78
+
+   41 directional_scan: WEST_SCAN •
+
+    $default  reduce using rule 41 (directional_scan)
+
+
+State 79
+
+   42 directional_scan: NORTH_SCAN •
+
+    $default  reduce using rule 42 (directional_scan)
+
+
+State 80
+
+   43 directional_scan: SOUTH_SCAN •
+
+    $default  reduce using rule 43 (directional_scan)
+
+
+State 81
+
+   31 conditional_stmt: IF '(' condition • ')' stmt
+   32                 | IF '(' condition • ')' stmt ELSE stmt
+
+    ')'  shift, and go to state 90
+
+
+State 82
+
+   38 condition: directional_scan • EQ_OP scan_result
+   39          | directional_scan • NE_OP scan_result
+
+    EQ_OP  shift, and go to state 91
+    NE_OP  shift, and go to state 92
+
+
+State 83
+
+   35 repetition_stmt: REPEAT expr ';' •
+
+    $default  reduce using rule 35 (repetition_stmt)
+
+
+State 84
+
+   33 repetition_stmt: REPEAT expr compound_stmt •
+
+    $default  reduce using rule 33 (repetition_stmt)
+
+
+State 85
+
+   26 compound_stmt: '{' stmt_list '}' •
+
+    $default  reduce using rule 26 (compound_stmt)
+
+
+State 86
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT '(' • expr ',' expr ')' ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 93
+
+
+State 87
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER • AT '(' expr ',' expr ')' ';'
+
+    AT  shift, and go to state 94
+
+
+State 88
+
+    7 grid_decl: GRID '(' expr ',' expr ')' '{' obstacle_list • '}'
+    9 obstacle_list: obstacle_list • obstacle_stmt
+
+    OBSTACLE  shift, and go to state 95
+    '}'       shift, and go to state 96
+
+    obstacle_stmt  go to state 97
+
+
+State 89
+
+   36 condition: SCAN '(' • direction '?' ')' EQ_OP scan_result
+   37          | SCAN '(' • direction '?' ')' NE_OP scan_result
+
+    NORTH  shift, and go to state 58
+    SOUTH  shift, and go to state 59
+    EAST   shift, and go to state 60
+    WEST   shift, and go to state 61
+
+    direction  go to state 98
+
+
+State 90
+
+   31 conditional_stmt: IF '(' condition ')' • stmt
+   32                 | IF '(' condition ')' • stmt ELSE stmt
+
+    GO      shift, and go to state 39
+    TURN    shift, and go to state 40
+    PICK    shift, and go to state 41
+    DROP    shift, and go to state 42
+    IF      shift, and go to state 43
+    REPEAT  shift, and go to state 44
+    '{'     shift, and go to state 45
+
+    stmt              go to state 99
+    compound_stmt     go to state 48
+    movement_stmt     go to state 49
+    rotation_stmt     go to state 50
+    pick_stmt         go to state 51
+    drop_stmt         go to state 52
+    conditional_stmt  go to state 53
+    repetition_stmt   go to state 54
+
+
+State 91
+
+   38 condition: directional_scan EQ_OP • scan_result
+
+    OBSTACLE  shift, and go to state 100
+    EMPTY     shift, and go to state 101
+
+    scan_result  go to state 102
+
+
+State 92
+
+   39 condition: directional_scan NE_OP • scan_result
+
+    OBSTACLE  shift, and go to state 100
+    EMPTY     shift, and go to state 101
+
+    scan_result  go to state 103
+
+
+State 93
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT '(' expr • ',' expr ')' ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ','       shift, and go to state 104
+
+
+State 94
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER AT • '(' expr ',' expr ')' ';'
+
+    '('  shift, and go to state 105
+
+
+State 95
+
+   10 obstacle_stmt: OBSTACLE • '(' expr ',' expr ')' ';'
+
+    '('  shift, and go to state 106
+
+
+State 96
+
+    7 grid_decl: GRID '(' expr ',' expr ')' '{' obstacle_list '}' •
+
+    $default  reduce using rule 7 (grid_decl)
+
+
+State 97
+
+    9 obstacle_list: obstacle_list obstacle_stmt •
+
+    $default  reduce using rule 9 (obstacle_list)
+
+
+State 98
+
+   36 condition: SCAN '(' direction • '?' ')' EQ_OP scan_result
+   37          | SCAN '(' direction • '?' ')' NE_OP scan_result
+
+    '?'  shift, and go to state 107
+
+
+State 99
+
+   31 conditional_stmt: IF '(' condition ')' stmt •
+   32                 | IF '(' condition ')' stmt • ELSE stmt
+
+    ELSE  shift, and go to state 108
+
+    $default  reduce using rule 31 (conditional_stmt)
+
+
+State 100
+
+   44 scan_result: OBSTACLE •
+
+    $default  reduce using rule 44 (scan_result)
+
+
+State 101
+
+   45 scan_result: EMPTY •
+
+    $default  reduce using rule 45 (scan_result)
+
+
+State 102
+
+   38 condition: directional_scan EQ_OP scan_result •
+
+    $default  reduce using rule 38 (condition)
+
+
+State 103
+
+   39 condition: directional_scan NE_OP scan_result •
+
+    $default  reduce using rule 39 (condition)
+
+
+State 104
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT '(' expr ',' • expr ')' ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 109
+
+
+State 105
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER AT '(' • expr ',' expr ')' ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 110
+
+
+State 106
+
+   10 obstacle_stmt: OBSTACLE '(' • expr ',' expr ')' ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 111
+
+
+State 107
+
+   36 condition: SCAN '(' direction '?' • ')' EQ_OP scan_result
+   37          | SCAN '(' direction '?' • ')' NE_OP scan_result
+
+    ')'  shift, and go to state 112
+
+
+State 108
+
+   32 conditional_stmt: IF '(' condition ')' stmt ELSE • stmt
+
+    GO      shift, and go to state 39
+    TURN    shift, and go to state 40
+    PICK    shift, and go to state 41
+    DROP    shift, and go to state 42
+    IF      shift, and go to state 43
+    REPEAT  shift, and go to state 44
+    '{'     shift, and go to state 45
+
+    stmt              go to state 113
+    compound_stmt     go to state 48
+    movement_stmt     go to state 49
+    rotation_stmt     go to state 50
+    pick_stmt         go to state 51
+    drop_stmt         go to state 52
+    conditional_stmt  go to state 53
+    repetition_stmt   go to state 54
+
+
+State 109
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT '(' expr ',' expr • ')' ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ')'       shift, and go to state 114
+
+
+State 110
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr • ',' expr ')' ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ','       shift, and go to state 115
+
+
+State 111
+
+   10 obstacle_stmt: OBSTACLE '(' expr • ',' expr ')' ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ','       shift, and go to state 116
+
+
+State 112
+
+   36 condition: SCAN '(' direction '?' ')' • EQ_OP scan_result
+   37          | SCAN '(' direction '?' ')' • NE_OP scan_result
+
+    EQ_OP  shift, and go to state 117
+    NE_OP  shift, and go to state 118
+
+
+State 113
+
+   32 conditional_stmt: IF '(' condition ')' stmt ELSE stmt •
+
+    $default  reduce using rule 32 (conditional_stmt)
+
+
+State 114
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT '(' expr ',' expr ')' • ';'
+
+    ';'  shift, and go to state 119
+
+
+State 115
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' • expr ')' ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 120
+
+
+State 116
+
+   10 obstacle_stmt: OBSTACLE '(' expr ',' • expr ')' ';'
+
+    MINUS    shift, and go to state 14
+    INTEGER  shift, and go to state 15
+    '('      shift, and go to state 16
+
+    expr  go to state 121
+
+
+State 117
+
+   36 condition: SCAN '(' direction '?' ')' EQ_OP • scan_result
+
+    OBSTACLE  shift, and go to state 100
+    EMPTY     shift, and go to state 101
+
+    scan_result  go to state 122
+
+
+State 118
+
+   37 condition: SCAN '(' direction '?' ')' NE_OP • scan_result
+
+    OBSTACLE  shift, and go to state 100
+    EMPTY     shift, and go to state 101
+
+    scan_result  go to state 123
+
+
+State 119
+
+   15 spawn_stmt: SPAWN IDENTIFIER AT '(' expr ',' expr ')' ';' •
+
+    $default  reduce using rule 15 (spawn_stmt)
+
+
+State 120
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr • ')' ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ')'       shift, and go to state 124
+
+
+State 121
+
+   10 obstacle_stmt: OBSTACLE '(' expr ',' expr • ')' ';'
+   51 expr: expr • PLUS expr
+   52     | expr • MINUS expr
+   54     | expr • MULTIPLY expr
+   55     | expr • DIVIDE expr
+   56     | expr • MODULO expr
+
+    PLUS      shift, and go to state 22
+    MINUS     shift, and go to state 23
+    MULTIPLY  shift, and go to state 24
+    DIVIDE    shift, and go to state 25
+    MODULO    shift, and go to state 26
+    ')'       shift, and go to state 125
+
+
+State 122
+
+   36 condition: SCAN '(' direction '?' ')' EQ_OP scan_result •
+
+    $default  reduce using rule 36 (condition)
+
+
+State 123
+
+   37 condition: SCAN '(' direction '?' ')' NE_OP scan_result •
+
+    $default  reduce using rule 37 (condition)
+
+
+State 124
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' • ';'
+
+    ';'  shift, and go to state 126
+
+
+State 125
+
+   10 obstacle_stmt: OBSTACLE '(' expr ',' expr ')' • ';'
+
+    ';'  shift, and go to state 127
+
+
+State 126
+
+   16 spawn_stmt: SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' ';' •
+
+    $default  reduce using rule 16 (spawn_stmt)
+
+
+State 127
+
+   10 obstacle_stmt: OBSTACLE '(' expr ',' expr ')' ';' •
+
+    $default  reduce using rule 10 (obstacle_stmt)

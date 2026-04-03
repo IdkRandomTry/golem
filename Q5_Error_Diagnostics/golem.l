@@ -8,14 +8,17 @@ WS  [ \t\v\n\f]
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "y.tab.h"
+#include "golem.tab.h"
 #include "tokens.h"
 
 static void comment(void);
 extern void yyerror(const char *s);
+extern int error_count;
+extern int warning_count;
 %}
 
 %option nounput
+%option yylineno
 
 %%
 "/*"					{ comment(); }
@@ -101,12 +104,19 @@ static void comment(void)
 }
 
 int main(int argc, char **argv) {
-    FILE *input_file;
+    FILE *input_file = NULL;
 
     if (argc > 1) {
         input_file = fopen(argv[1], "r");
         if (!input_file) {
-            fprintf(stderr, "Error: Cannot open file '%s'\n", argv[1]);
+            fprintf(stderr, "╔════════════════════════════════════════════════════════════════╗\n");
+            fprintf(stderr, "║                         FILE ERROR                             ║\n");
+            fprintf(stderr, "╚════════════════════════════════════════════════════════════════╝\n");
+            fprintf(stderr, "\nError: Cannot open file '%s'\n", argv[1]);
+            fprintf(stderr, "Please check:\n");
+            fprintf(stderr, "  • File exists\n");
+            fprintf(stderr, "  • File path is correct\n");
+            fprintf(stderr, "  • You have read permissions\n\n");
             return 1;
         }
         yyin = input_file;
@@ -114,8 +124,9 @@ int main(int argc, char **argv) {
         yyin = stdin;
     }
 
-    printf("GOLEM Parser\n");
-    printf("============\n\n");
+    printf("╔════════════════════════════════════════════════════════════════╗\n");
+    printf("║          GOLEM Parser - Part 5: Error Diagnostics             ║\n");
+    printf("╚════════════════════════════════════════════════════════════════╝\n\n");
 
     int result = yyparse();
 
@@ -123,11 +134,25 @@ int main(int argc, char **argv) {
         fclose(input_file);
     }
 
-    if (result == 0) {
-        printf("\n============\nParsing successful!\n");
+    printf("\n╔════════════════════════════════════════════════════════════════╗\n");
+    printf("║                       PARSING SUMMARY                          ║\n");
+    printf("╚════════════════════════════════════════════════════════════════╝\n\n");
+
+    if (result == 0 && error_count == 0) {
+        printf("✓ Parsing successful!\n");
+        printf("  • No errors detected\n");
+        if (warning_count > 0) {
+            printf("  • %d warning(s) issued\n", warning_count);
+        }
+        printf("\n");
         return 0;
     } else {
-        printf("\n============\nParsing failed!\n");
+        printf("✗ Parsing failed!\n");
+        printf("  • %d error(s) detected\n", error_count);
+        if (warning_count > 0) {
+            printf("  • %d warning(s) issued\n", warning_count);
+        }
+        printf("\nPlease fix the errors and try again.\n\n");
         return 1;
     }
 }

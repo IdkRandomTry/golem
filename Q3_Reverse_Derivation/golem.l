@@ -8,11 +8,13 @@ WS  [ \t\v\n\f]
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include "y.tab.h"
+#include "golem.tab.h"
 #include "tokens.h"
 
 static void comment(void);
 extern void yyerror(const char *s);
+extern void display_reverse_derivation();
+extern void free_derivations();
 %}
 
 %option nounput
@@ -101,7 +103,7 @@ static void comment(void)
 }
 
 int main(int argc, char **argv) {
-    FILE *input_file;
+    FILE *input_file = NULL;
 
     if (argc > 1) {
         input_file = fopen(argv[1], "r");
@@ -114,8 +116,9 @@ int main(int argc, char **argv) {
         yyin = stdin;
     }
 
-    printf("GOLEM Parser\n");
-    printf("============\n\n");
+    printf("╔════════════════════════════════════════════════════════════════╗\n");
+    printf("║             GOLEM Parser - Part 3: Derivation Tree            ║\n");
+    printf("╚════════════════════════════════════════════════════════════════╝\n\n");
 
     int result = yyparse();
 
@@ -124,10 +127,21 @@ int main(int argc, char **argv) {
     }
 
     if (result == 0) {
-        printf("\n============\nParsing successful!\n");
+        printf("\n╔════════════════════════════════════════════════════════════════╗\n");
+        printf("║                     Parsing Successful!                        ║\n");
+        printf("╚════════════════════════════════════════════════════════════════╝\n");
+        
+        /* Display reverse derivation tree */
+        display_reverse_derivation();
+        
+        /* Cleanup */
+        free_derivations();
         return 0;
     } else {
-        printf("\n============\nParsing failed!\n");
+        printf("\n╔════════════════════════════════════════════════════════════════╗\n");
+        printf("║                      Parsing Failed!                           ║\n");
+        printf("╚════════════════════════════════════════════════════════════════╝\n");
+        free_derivations();
         return 1;
     }
 }

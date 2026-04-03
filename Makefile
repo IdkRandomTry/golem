@@ -3,9 +3,25 @@ CFLAGS = -Wall -g
 LEX = flex
 YACC = bison -y -d
 
+# Root directory configuration
 TARGET = golem
 LEXER = golem.l
 PARSER = golem.y
+
+# Q1 and Q2 configurations
+Q1_DIR = Q1_LALR_With_Conflicts
+Q1_PARSER = $(Q1_DIR)/golem_with_conflicts.y
+Q1_LEXER = $(Q1_DIR)/golem.l
+Q1_TARGET = $(Q1_DIR)/golem_with_conflicts
+
+Q2_DIR = Q2_Conflict_Resolution
+Q2_PARSER = $(Q2_DIR)/golem.y
+Q2_LEXER = $(Q2_DIR)/golem.l
+Q2_TARGET = $(Q2_DIR)/golem
+
+# ============================================================================
+# ROOT DIRECTORY TARGETS (make / make clean)
+# ============================================================================
 
 all: $(TARGET)
 
@@ -27,8 +43,85 @@ test: $(TARGET)
 	@echo "Testing parser with arithmetic.golem..."
 	./$(TARGET) < test-case/arithmetic.golem
 
-
 clean:
 	rm -f $(TARGET) lex.yy.c y.tab.c y.tab.h
 
-.PHONY: all clean test
+# ============================================================================
+# Q1: LALR(1) AUTOMATON WITH CONFLICTS
+# Usage: make Q1        (compile Q1 grammar)
+#        make Q1.clean  (clean Q1 generated files)
+# ============================================================================
+
+Q1: $(Q1_TARGET)
+	@echo "✓ Q1 build complete: $(Q1_TARGET)"
+
+$(Q1_TARGET): $(Q1_DIR)/y.tab.h
+	cd $(Q1_DIR) && $(LEX) golem.l
+	$(CC) $(CFLAGS) -o $(Q1_TARGET) $(Q1_DIR)/lex.yy.c $(Q1_DIR)/y.tab.c -ll
+
+$(Q1_DIR)/y.tab.c $(Q1_DIR)/y.tab.h: $(Q1_PARSER)
+	cd $(Q1_DIR) && $(YACC) $(notdir $(Q1_PARSER))
+
+$(Q1_DIR)/lex.yy.c: $(Q1_LEXER) $(Q1_DIR)/y.tab.h
+	cd $(Q1_DIR) && $(LEX) $(notdir $(Q1_LEXER))
+
+Q1.clean:
+	@echo "Cleaning Q1 generated files..."
+	@rm -f $(Q1_DIR)/golem_with_conflicts $(Q1_DIR)/lex.yy.c $(Q1_DIR)/y.tab.c $(Q1_DIR)/y.tab.h
+	@echo "✓ Q1 cleaned"
+
+# ============================================================================
+# Q2: CONFLICT RESOLUTION
+# Usage: make Q2        (compile Q2 grammar)
+#        make Q2.clean  (clean Q2 generated files)
+# ============================================================================
+
+Q2: $(Q2_TARGET)
+	@echo "✓ Q2 build complete: $(Q2_TARGET)"
+
+$(Q2_TARGET): $(Q2_DIR)/y.tab.h
+	cd $(Q2_DIR) && $(LEX) golem.l
+	$(CC) $(CFLAGS) -o $(Q2_TARGET) $(Q2_DIR)/lex.yy.c $(Q2_DIR)/y.tab.c -ll
+
+$(Q2_DIR)/y.tab.c $(Q2_DIR)/y.tab.h: $(Q2_PARSER)
+	cd $(Q2_DIR) && $(YACC) $(notdir $(Q2_PARSER))
+
+$(Q2_DIR)/lex.yy.c: $(Q2_LEXER) $(Q2_DIR)/y.tab.h
+	cd $(Q2_DIR) && $(LEX) $(notdir $(Q2_LEXER))
+
+Q2.clean:
+	@echo "Cleaning Q2 generated files..."
+	@rm -f $(Q2_DIR)/golem $(Q2_DIR)/lex.yy.c $(Q2_DIR)/y.tab.c $(Q2_DIR)/y.tab.h
+	@echo "✓ Q2 cleaned"
+
+# ============================================================================
+# HELP TARGET
+# ============================================================================
+
+help:
+	@echo ""
+	@echo "Golem Language Compiler - Build Targets"
+	@echo "========================================"
+	@echo ""
+	@echo "ROOT DIRECTORY:"
+	@echo "  make              - Build the final parser (root)"
+	@echo "  make clean        - Clean root directory build artifacts"
+	@echo "  make test         - Test the root parser"
+	@echo ""
+	@echo "PART 1 (Q1): LALR(1) with Conflicts"
+	@echo "  make Q1           - Build Q1_LALR_With_Conflicts grammar"
+	@echo "  make Q1.clean     - Clean Q1 build artifacts"
+	@echo ""
+	@echo "PART 2 (Q2): Conflict Resolution"
+	@echo "  make Q2           - Build Q2_Conflict_Resolution grammar"
+	@echo "  make Q2.clean     - Clean Q2 build artifacts"
+	@echo ""
+	@echo "OTHER:"
+	@echo "  make help         - Show this help message"
+	@echo ""
+
+# ============================================================================
+# PHONY TARGETS
+# ============================================================================
+
+.PHONY: all clean test Q1 Q2 Q1.clean Q2.clean help

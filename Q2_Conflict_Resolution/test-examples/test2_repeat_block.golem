@@ -1,0 +1,24 @@
+// Test Case 2: Repeat with Block (Fixed - now works!)
+
+grid(10, 10) {
+    obstacle(2, 2);
+    obstacle(3, 3);
+}
+
+blueprint test_repeat {
+    // Should execute block 10 times
+    repeat 10 {
+        go 5;
+        turn north;
+    }
+    
+    // Infinite loop
+    repeat {
+        go 1;
+        turn east;
+    }
+}
+
+construct {
+    spawn bot1 at (1, 1);
+}

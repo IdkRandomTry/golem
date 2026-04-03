@@ -1,0 +1,151 @@
+================================================================================
+                    LALR(1) AUTOMATON CONSTRUCTION REPORT
+                        Golem Language Specification
+================================================================================
+
+1. GRAMMAR RULES
+================================================================================
+
+Production Rules:
+-----------------
+0.  $accept → program $end
+1.  program → ε
+2.  program → program statement
+3.  statement → grid_decl
+4.  statement → blueprint_decl
+5.  statement → construct_decl
+6.  statement → ';'
+7.  grid_decl → GRID '(' expr ',' expr ')' '{' obstacle_list '}'
+8.  obstacle_list → ε
+9.  obstacle_list → obstacle_list obstacle_stmt
+10. obstacle_stmt → OBSTACLE '(' expr ',' expr ')' ';'
+11. blueprint_decl → BLUEPRINT IDENTIFIER '{' stmt_list '}'
+12. construct_decl → CONSTRUCT '{' spawn_list '}'
+13. spawn_list → ε
+14. spawn_list → spawn_list spawn_stmt
+15. spawn_stmt → SPAWN IDENTIFIER AT '(' expr ',' expr ')' ';'
+16. spawn_stmt → SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' ';'
+17. stmt_list → ε
+18. stmt_list → stmt_list stmt
+19. stmt → movement_stmt
+20. stmt → rotation_stmt
+21. stmt → pick_stmt
+22. stmt → drop_stmt
+23. stmt → conditional_stmt
+24. stmt → repetition_stmt
+25. stmt → stmt_block
+26. stmt_block → '{' stmt_list '}'
+27. movement_stmt → GO expr ';'
+28. rotation_stmt → TURN direction ';'
+29. pick_stmt → PICK IDENTIFIER ';'
+30. drop_stmt → DROP IDENTIFIER ';'
+31. conditional_stmt → IF '(' condition ')' '{' stmt_list '}'  [CONFLICT!]
+32. conditional_stmt → IF '(' condition ')' stmt
+33. repetition_stmt → REPEAT expr '{' stmt_list '}'
+34. repetition_stmt → REPEAT '{' stmt_list '}'
+35. condition → SCAN '(' direction '?' ')' EQ_OP scan_result
+36. condition → SCAN '(' direction '?' ')' NE_OP scan_result
+37. condition → directional_scan EQ_OP scan_result
+38. condition → directional_scan NE_OP scan_result
+39. directional_scan → EAST_SCAN
+40. directional_scan → WEST_SCAN
+41. directional_scan → NORTH_SCAN
+42. directional_scan → SOUTH_SCAN
+43. scan_result → OBSTACLE
+44. scan_result → EMPTY
+45. direction → NORTH
+46. direction → SOUTH
+47. direction → EAST
+48. direction → WEST
+49. expr → INTEGER
+50. expr → expr PLUS expr
+51. expr → expr MINUS expr
+52. expr → MINUS expr
+53. expr → expr MULTIPLY expr
+54. expr → expr DIVIDE expr
+55. expr → expr MODULO expr
+56. expr → '(' expr ')'
+
+================================================================================
+2. LALR(1) AUTOMATON SUMMARY
+================================================================================
+
+Total States: 132
+States with Conflicts: 1
+Shift/Reduce Conflicts: 0
+Reduce/Reduce Conflicts: 8 (in State 117)
+
+================================================================================
+3. KEY LALR(1) ITEM SETS (Selected States)
+================================================================================
+
+State 0 (Initial State):
+------------------------
+[0] $accept → • program $end
+[1] program → •
+[2] program → • program statement
+
+FIRST sets:
+  FIRST(program) = {ε, GRID, BLUEPRINT, CONSTRUCT, ';'}
+
+Transitions:
+  program → State 1
+
+Action: Reduce by rule 1 (program → ε) on {GRID, BLUEPRINT, CONSTRUCT, ';', $end}
+
+
+State 1:
+--------
+[0] $accept → program • $end
+[2] program → program • statement
+[3] statement → • grid_decl
+[4] statement → • blueprint_decl
+[5] statement → • construct_decl
+[6] statement → • ';'
+[7] grid_decl → • GRID '(' expr ',' expr ')' '{' obstacle_list '}'
+[11] blueprint_decl → • BLUEPRINT IDENTIFIER '{' stmt_list '}'
+[12] construct_decl → • CONSTRUCT '{' spawn_list '}'
+
+Transitions:
+  $end → State 2 (accept)
+  ';' → State 3
+  GRID → State 4
+  BLUEPRINT → State 5
+  CONSTRUCT → State 6
+  statement → State 7
+  grid_decl → State 8
+  blueprint_decl → State 9
+  construct_decl → State 10
+
+
+State 117 (CONFLICT STATE):
+---------------------------
+[26] stmt_block → '{' stmt_list '}' •
+[31] conditional_stmt → IF '(' condition ')' '{' stmt_list '}' •
+
+This state has 8 REDUCE/REDUCE conflicts on the following lookahead symbols:
+  - GO
+  - TURN
+  - PICK
+  - DROP
+  - IF
+  - REPEAT
+  - '{'
+  - '}'
+
+Conflict Analysis:
+  Both productions are complete (dot at the end). When the parser sees any of
+  the above lookahead symbols, it cannot determine whether to:
+    a) Reduce by rule 26 (stmt_block → '{' stmt_list '}')
+    b) Reduce by rule 31 (conditional_stmt → IF '(' condition ')' '{' stmt_list '}')
+
+  This ambiguity arises because:
+    1. We added stmt_block as a valid stmt (rule 25)
+    2. conditional_stmt with braces has the same ending pattern as stmt_block
+    3. The grammar cannot distinguish between a standalone block and an if-statement
+       block when looking ahead
+
+  Resolution:
+    Bison chooses rule 26 (stmt_block) by default since it appears first.
+    However, this makes rule 31 unreachable (marked as useless).
+

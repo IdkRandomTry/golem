@@ -1,0 +1,18 @@
+// Test Case 1: Dangling Else Problem
+// ELSE should associate with inner (nearest) IF
+
+grid(10, 10) {
+}
+
+blueprint test_dangling_else {
+    // Nested if-else: ELSE should associate with inner IF
+    if (scan(north?) == obstacle)
+        if (scan(east?) == empty)
+            go 5;
+        else
+            turn south;
+}
+
+construct {
+    spawn robot1 at (5, 5);
+}

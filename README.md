@@ -1,8 +1,3 @@
-# Updates (For t):
-- VS Code extension YASH is good
-- basic lexer implemented
-- the .y file does nothing rn. only needed it to define the keywords
-
 # Imp commands
 - use wsl
 - use `make clean && make test`
@@ -79,6 +74,7 @@ scan Inspects an adjacent grid cell without altering state.
 pick Transfers an item into inventory.
 drop Places an inventory item into the current cell.
 if Conditional execution construct.
+else Alternative branch for conditional execution.
 repeat Executes statements a fixed number of times.
 north, south, east, west
 Directional constants.
@@ -96,6 +92,7 @@ true, false Boolean literals.
 - Subtraction
 * Multiplication
 / Integer Division (result is always integer, truncated toward zero)
+% Modulo (remainder after integer division)
 
 ### 3.3 Directional Symbols
 
@@ -124,13 +121,13 @@ vv South scan shorthand
 Arithmetic expressions evaluate to integers and can be used in:
 - Grid dimensions: `grid(10, 20)`
 - Movement: `go 5 + 3;`, `go 2 * 4;`
-- Repetition: `repeat 10 / 2 { ... }`
+- Repetition: `repeat 10 / 2 { ... }`, `repeat 7 % 3 { ... }`
 - Coordinates (grid, obstacles, spawn): `at (2 * 3, 4 + 1)`
 
 Operator precedence (highest to lowest):
 1. Parentheses `( )`
 2. Unary minus `-` (right-associative)
-3. Multiplication `*` and Division `/` (left-associative)
+3. Multiplication `*`, Division `/`, and Modulo `%` (left-associative)
 4. Addition `+` and Subtraction `-` (left-associative)
 
 ### 3.8 Negative Numbers
@@ -216,6 +213,12 @@ drop item;
 ### 6.5 Conditional Execution
 ```
 if(condition) {
+statements
+}
+
+if(condition) {
+statements
+} else {
 statements
 }
 ```
@@ -358,7 +361,6 @@ spawn reverser at (0, 0);
 
 GOLEM provides a compact and expressive language for modeling autonomous agent behavior
 within structured environments. Its constrained syntax and deterministic semantics enable clear
-reasoning about spatial actions while remaining accessible for experimentation and demonstra-
-tion.
+reasoning about spatial actions while remaining accessible for experimentation and demonstration.
 
 
