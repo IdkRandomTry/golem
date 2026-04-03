@@ -2,7 +2,7 @@
 
 ## Overview
 
-This part outputs the LALR(1) parsing table in matrix (tabular) format, following the structure used in compiler course lecture slides.
+This part generates the LALR(1) parsing table in matrix (tabular) form from a Bison `.output` file and exports it to CSV, Markdown summary, and HTML.
 
 ## Features
 
@@ -12,10 +12,10 @@ This part outputs the LALR(1) parsing table in matrix (tabular) format, followin
    - Extracts ACTION and GOTO entries
 
 2. **Matrix Format Display**:
-   - Displays ACTION table (terminal columns)
-   - Displays GOTO table (nonterminal columns)
-   - Uses box-drawing characters for clear tabular format
-   - Follows lecture slide format conventions
+   - Produces separate ACTION and GOTO matrices as CSV
+   - Produces a combined matrix as an HTML table (single view)
+   - Uses standard parser-table notation (`sN`, `rN`, `acc`)
+   - Follows lecture slide conventions for ACTION/GOTO separation
 
 3. **Table Statistics**:
    - Total number of states
@@ -29,20 +29,26 @@ This part outputs the LALR(1) parsing table in matrix (tabular) format, followin
 A Python script that:
 - Reads the Bison `.output` file
 - Parses state information using regular expressions
-- Formats the parsing table in matrix form
-- Displays ACTION and GOTO sections separately
+- Expands `$default` actions for readability
+- Writes ACTION/GOTO tables and a combined HTML matrix
 
 ### Usage
 
 ```bash
 cd Q4_Parsing_Table
 
-# Run with default file (../golem.output)
-python3 parsing_table.py
+# Run with explicit input and output directory
+python3 parsing_table.py ../golem.output .
 
-# Run with specific file
-python3 parsing_table.py path/to/file.output
+# Alternative: from repository root
+python3 Q4_Parsing_Table/parsing_table.py golem.output Q4_Parsing_Table/
 ```
+
+Expected generated files:
+- `action_table.csv`
+- `goto_table.csv`
+- `parsing_table_summary.md`
+- `parsing_table_matrix.html`
 
 ## Table Format
 
@@ -62,42 +68,17 @@ python3 parsing_table.py path/to/file.output
   - `N`: Go to state N
   - Empty: Not applicable
 
-## Sample Output
+## Sample Summary Output
 
 ```
-╔════════════════════════════════════════════════════════════════╗
-║                    LALR(1) PARSING TABLE                       ║
-╠════════════════════════════════════════════════════════════════╣
-║ States: 128   Terminals: 40   Nonterminals: 24                ║
-╚════════════════════════════════════════════════════════════════╝
+# Parsing Table Summary
 
-┌──────┬───────────────────────────────────────────────────────┐
-│STATE │                    ACTION                             │
-├──────┼───────┬───────┬───────┬───────┬───────┬...            │
-│      │ $end  │  AS   │  AT   │ BLUE  │ CONST │...            │
-├──────┼───────┼───────┼───────┼───────┼───────┼...            │
-│  0   │  acc  │       │       │       │       │...            │
-│  1   │  acc  │       │       │  s4   │  s5   │...            │
-│  2   │  acc  │       │       │       │       │...            │
-...
-└──────┴───────┴───────┴───────┴───────┴───────┴...            ┘
-
-┌──────┬───────────────────────────────────────────────────────┐
-│STATE │                    GOTO                               │
-├──────┼────────┬──────┬──────┬──────┬──────┬...               │
-│      │program │ stmt │ expr │ decl │ list │...               │
-├──────┼────────┼──────┼──────┼──────┼──────┼...               │
-│  0   │   1    │      │      │      │      │...               │
-│  1   │        │  2   │      │      │      │...               │
-...
-└──────┴────────┴──────┴──────┴──────┴──────┴...               ┘
-
-Legend:
-  sN  = shift and go to state N
-  rN  = reduce using rule N
-  acc = accept
-  N   = goto state N (in GOTO section)
+- Number of states: 128
+- ACTION columns: 47
+- GOTO columns: 23
 ```
+
+Console output from the script prints generated file paths rather than rendering the full table directly in terminal.
 
 ## Technical Details
 
@@ -114,32 +95,38 @@ Legend:
    - Extract accept actions
    - Extract goto transitions
 
-3. **Format Output**:
-   - Calculate column widths dynamically
-   - Create box-drawing table structure
-   - Align entries for readability
+3. **Generate Outputs**:
+   - Write ACTION matrix to `action_table.csv`
+   - Write GOTO matrix to `goto_table.csv`
+   - Write column/state statistics to `parsing_table_summary.md`
+   - Write combined matrix view to `parsing_table_matrix.html`
 
 ### Regex Patterns Used
 
 - States: `State\s+(\d+)(.*?)(?=State\s+\d+|$)`
-- Shifts: `(\w+|\$end)\s+shift.*?state\s+(\d+)`
-- Reduces: `(\w+|\$end)\s+reduce using rule\s+(\d+)`
+- Shifts: `\s+(\S+)\s+\[?shift, and go to state\s+(\d+)\]?`
+- Reduces: `\s+(\S+)\s+\[?reduce using rule\s+(\d+)\s+\(([^)]+)\)\]?`
 - Gotos: `(\w+)\s+go to state\s+(\d+)`
+- Defaults: `$default reduce using rule ...` and `$default accept`
 
 ## Comparison with Lecture Slides
 
 This implementation follows the standard format taught in compiler courses:
 
-1. **Two-part table**: Separate ACTION and GOTO sections
+1. **Two-part table**: Separate ACTION and GOTO data exports
 2. **State-based rows**: Each row represents a parser state
 3. **Symbol-based columns**: Terminals in ACTION, nonterminals in GOTO
 4. **Standard notation**: `sN`, `rN`, `acc` for actions
-5. **Clear visual structure**: Box characters for table borders
+5. **Clear visual structure**: Combined matrix available as HTML
 
 ## Files
 
 - `parsing_table.py`: Main script for table extraction and display
 - `README.md`: This documentation
+- `action_table.csv`: ACTION matrix export
+- `goto_table.csv`: GOTO matrix export
+- `parsing_table_summary.md`: Summary statistics and column lists
+- `parsing_table_matrix.html`: Combined ACTION+GOTO matrix (single view)
 - `../golem.output`: Generated Bison output file (used as input)
 
 ## Dependencies
