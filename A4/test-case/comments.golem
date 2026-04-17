@@ -1,0 +1,43 @@
+// This is a single-line comment at the beginning
+// Testing comment functionality in golem
+
+/* This is a multi-line comment
+   that spans multiple lines
+   to test block comments */
+
+grid(3, 3) {} // inline comment after grid definition
+
+/* Testing comment before blueprint */
+blueprint mover { // comment after opening brace
+    // Comment inside blueprint
+    go 1; // move forward by 1 step
+    turn north; // turn to face north
+    /* Multi-line comment
+       inside blueprint block */
+    go 2;
+}
+
+// Another single-line comment between blocks
+
+blueprint collector {
+    pick; /* inline multi-line */ drop;
+    // Testing multiple operations
+    scan >>; // scan east
+}
+
+/* 
+ * Multi-line comment before construct block
+ * with asterisks on each line
+ */
+construct {
+    // Spawn first mover
+    spawn mover at (0, 0); // at origin
+    
+    /* Spawn collector at different position */
+    spawn collector at (1, 1);
+    
+    // End of construct block
+}
+
+// Final comment at end of file
+/* Another final multi-line comment */

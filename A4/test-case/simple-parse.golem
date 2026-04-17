@@ -1,0 +1,9 @@
+grid(5, 5) {}
+
+blueprint simple {
+    go 3;
+}
+
+construct {
+    spawn simple at (0, 0);
+}

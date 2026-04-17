@@ -1,0 +1,11 @@
+grid(5, 5) {
+    obstacle(-2, 3);
+}
+
+blueprint test {
+    go 1;
+}
+
+construct {
+    spawn test at (0, 0);
+}

@@ -1,0 +1,9 @@
+grid(5, 5) {}
+
+blueprint test {
+    go 1;
+}
+
+construct {
+    spawn test at (-1, 2);
+}

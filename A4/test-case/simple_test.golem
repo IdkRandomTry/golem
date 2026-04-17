@@ -1,0 +1,11 @@
+// Simple test
+grid(5, 5) {
+}
+
+blueprint simple {
+    go 10;
+}
+
+construct {
+    spawn bot at (1, 1);
+}
