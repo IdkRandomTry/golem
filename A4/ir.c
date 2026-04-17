@@ -52,12 +52,12 @@ void print_ir(void) {
     }
 
     printf("\nGenerated Intermediate Code (3AC Quadruples):\n");
-    printf("#    | op         | arg1       | arg2       | result\n");
-    printf("-----|------------|------------|------------|------------\n");
+    printf("#    | op              | arg1       | arg2       | result\n");
+    printf("-----|-----------------|------------|------------|------------\n");
 
     node = ir_head;
     while (node) {
-        printf("%-4d | %-10s | %-10s | %-10s | %-10s\n",
+        printf("%-4d | %-15s | %-10s | %-10s | %-10s\n",
                idx,
                node->quad.op,
                node->quad.arg1 ? node->quad.arg1 : "-",

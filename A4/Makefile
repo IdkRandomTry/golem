@@ -4,7 +4,7 @@
 CC = gcc
 CFLAGS = -Wall -g
 LEX = flex
-YACC = bison -y -d
+YACC = bison -d -o y.tab.c
 
 TARGET = golem
 LEXER = golem.l

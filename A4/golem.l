@@ -46,16 +46,16 @@ extern void yyerror(const char *s);
 "false"					{ return(FALSE); }
 "empty"					{ return(EMPTY); } /* [FLAG: Add keyword] Add keyword token here as needed */
 
+">>"					{ return(EAST_SCAN); }
+[<][<]					{ return(WEST_SCAN); }
+"^^"					{ return(NORTH_SCAN); }
+"vv"					{ return(SOUTH_SCAN); }
+
 {ID}					{ yylval.sval = strdup(yytext); return(IDENTIFIER); }
 
 {D}+					{ yylval.ival = atoi(yytext); return(INTEGER); }
 
 \"[^\"]*\"				{ yylval.sval = strdup(yytext); return(STRING_LITERAL); }
-
-">>"					{ return(EAST_SCAN); }
-[<][<]					{ return(WEST_SCAN); }
-"^^"					{ return(NORTH_SCAN); }
-"vv"					{ return(SOUTH_SCAN); }
 
 "=="					{ return(EQ_OP); }
 "!="					{ return(NE_OP); }
