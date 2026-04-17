@@ -84,7 +84,6 @@ grid_decl:
 			yyerror("Grid dimensions must be non-negative");
 			YYERROR;
 		}
-		printf("  Grid: %d x %d\n", $3.val, $5.val);
 	}
 	;
 
@@ -103,15 +102,12 @@ obstacle_stmt:
 			yyerror("Obstacle coordinates must be non-negative");
 			YYERROR;
 		}
-		printf("  Obstacle at (%d, %d)\n", $3.val, $5.val);
 	}
 	;
 
 blueprint_decl:
 	BLUEPRINT IDENTIFIER '{' stmt_list '}'
-	{
-		printf("Blueprint '%s' defined\n", $2);
-	}
+	{}
 	;
 
 construct_decl:
@@ -133,7 +129,6 @@ spawn_stmt:
 			yyerror("Spawn coordinates must be non-negative");
 			YYERROR;
 		}
-		printf("  Spawn '%s' at (%d, %d)\n", $2, $5.val, $7.val);
 	}
 	| SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' ';'
 	{
@@ -145,7 +140,6 @@ spawn_stmt:
 			yyerror("Spawn coordinates must be non-negative");
 			YYERROR;
 		}
-		printf("  Spawn '%s' (alias '%s') at (%d, %d)\n", $2, $4, $7.val, $9.val);
 	}
 	;
 
@@ -166,9 +160,7 @@ stmt:
 /* FIXED: compound_stmt instead of stmt_block to avoid R/R conflict */
 compound_stmt:
 	'{' stmt_list '}'
-	{
-		printf("    { compound statements }\n");
-	}
+	{}
 	;
 
 if_prefix:
@@ -226,38 +218,22 @@ movement_stmt:
 	GO expr ';'
 	{
 		emit_quad("go", $2.place, NULL, NULL);
-		if (!$2.is_const) {
-			printf("    go %s;  (runtime expression)\n", $2.place);
-		} else if ($2.val == 0) {
-			printf("    go 0;  (no movement)\n");
-		} else if ($2.val < 0) {
-			int steps = -$2.val;
-			printf("    go -%d;  (turn 180°, move %d steps forward, face reversed direction)\n", steps, steps);
-		} else {
-			printf("    go %d;  (move %d steps forward)\n", $2.val, $2.val);
-		}
 	}
 	;
 
 rotation_stmt:
 	TURN direction ';'
-	{
-		printf("    turn direction;\n");
-	}
+	{}
 	;
 
 pick_stmt:
 	PICK IDENTIFIER ';'
-	{
-		printf("    pick %s;\n", $2);
-	}
+	{}
 	;
 
 drop_stmt:
 	DROP IDENTIFIER ';'
-	{
-		printf("    drop %s;\n", $2);
-	}
+	{}
 	;
 
 conditional_stmt:
@@ -267,7 +243,6 @@ conditional_stmt:
 		emit_quad("label", NULL, NULL, $1.end_label);
 		free($1.false_label);
 		free($1.end_label);
-		printf("    if (...) stmt\n");
 	}
 	| if_prefix stmt ELSE
 	{
@@ -278,7 +253,6 @@ conditional_stmt:
 		emit_quad("label", NULL, NULL, $1.end_label);
 		free($1.false_label);
 		free($1.end_label);
-		printf("    if (...) stmt else stmt\n");
 	}
 	;
 
@@ -291,13 +265,11 @@ repetition_stmt:
 		free($1.start_label);
 		free($1.end_label);
 		free($1.counter_place);
-		printf("    repeat { ... }\n");
 	}
 	| repeat_inf_prefix compound_stmt
 	{
 		emit_quad("goto", NULL, NULL, $1);
 		free($1);
-		printf("    repeat (infinite) { ... }\n");
 	}
 	| REPEAT expr ';'
 	{
@@ -310,7 +282,6 @@ repetition_stmt:
 			YYERROR;
 		}
 		emit_quad("repeat_once", $2.place, NULL, NULL);
-		printf("    repeat %d; (single iteration marker)\n", $2.val);
 	}
 	;
 

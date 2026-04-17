@@ -1,5 +1,11 @@
 # A4: Intermediate Code Generation (Quadruples)
 
+Akash Gupta (23110020)
+
+Kaushal Bule (23110160)
+
+Siddhesh Umarjee (23110347)
+
 ## Folder Structure
 
 ```

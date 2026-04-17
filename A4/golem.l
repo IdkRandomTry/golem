@@ -111,6 +111,11 @@ static void comment(void)
 
 int main(int argc, char **argv) {
     FILE *input_file = NULL;
+    FILE *source_stream = NULL;
+    FILE *parse_stream = NULL;
+    int ch;
+    int saw_char = 0;
+    int last_char = '\n';
 
     if (argc > 1) {
         input_file = fopen(argv[1], "r");
@@ -118,15 +123,40 @@ int main(int argc, char **argv) {
             fprintf(stderr, "Error: Cannot open file '%s'\n", argv[1]);
             return 1;
         }
-        yyin = input_file;
+        source_stream = input_file;
     } else {
-        yyin = stdin;
+        source_stream = stdin;
     }
 
-    printf("GOLEM Parser\n");
-    printf("============\n\n");
+    parse_stream = tmpfile();
+    if (!parse_stream) {
+        fprintf(stderr, "Error: Cannot create temporary parse buffer\n");
+        if (input_file) {
+            fclose(input_file);
+        }
+        return 1;
+    }
+
+    printf("Source Program:\n");
+    printf("===============\n");
+    while ((ch = fgetc(source_stream)) != EOF) {
+        fputc(ch, stdout);
+        fputc(ch, parse_stream);
+        saw_char = 1;
+        last_char = ch;
+    }
+    if (saw_char && last_char != '\n') {
+        fputc('\n', stdout);
+    }
+    printf("\n");
+
+    fflush(parse_stream);
+    rewind(parse_stream);
+    yyin = parse_stream;
 
     int result = yyparse();
+
+    fclose(parse_stream);
 
     if (input_file) {
         fclose(input_file);
