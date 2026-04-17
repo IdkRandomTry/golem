@@ -1,0 +1,9 @@
+grid(5, 5) {}
+
+blueprint bad_syntax {
+    go 1
+}
+
+construct {
+    spawn bad_syntax at (0, 0);
+}

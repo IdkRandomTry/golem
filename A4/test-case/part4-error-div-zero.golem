@@ -1,0 +1,9 @@
+grid(5, 5) {}
+
+blueprint bad_div {
+    go 9 / 0;
+}
+
+construct {
+    spawn bad_div at (0, 0);
+}

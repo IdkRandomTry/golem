@@ -51,6 +51,21 @@ part2-test: $(TARGET)
 	@echo "Input: test-case/part2-control.golem"
 	./$(TARGET) < test-case/part2-control.golem
 
+# Focused Part 4 tests (error diagnostics)
+part4-test: $(TARGET)
+	@echo "==== Part 4 Error Diagnostics Tests ===="
+	@set +e; \
+	for f in \
+		test-case/part4-error-grid-negative.golem \
+		test-case/part4-error-repeat-negative.golem \
+		test-case/part4-error-div-zero.golem \
+		test-case/part4-error-syntax-missing-semicolon.golem; do \
+			echo ""; \
+			echo "Input: $$f"; \
+			./$(TARGET) < $$f; \
+			echo "Exit code: $$?"; \
+		done
+
 clean:
 	rm -f $(TARGET) lex.yy.c y.tab.c y.tab.h
 
@@ -62,8 +77,11 @@ help:
 	@echo "Targets:"
 	@echo "  make        - Build A4 parser"
 	@echo "  make test   - Run test suite"
+	@echo "  make part1-test - Run focused Stage 3 expression test"
+	@echo "  make part2-test - Run focused Stage 4 control-flow test"
+	@echo "  make part4-test - Run focused Part 4 diagnostics tests"
 	@echo "  make clean  - Remove build artifacts"
 	@echo "  make help   - Show this message"
 	@echo ""
 
-.PHONY: all clean test stage3-test part1-test part2-test help
+.PHONY: all clean test stage3-test part1-test part2-test part4-test help

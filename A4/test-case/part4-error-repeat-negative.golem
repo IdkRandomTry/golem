@@ -1,0 +1,11 @@
+grid(5, 5) {}
+
+blueprint bad_repeat {
+    repeat -2 {
+        go 1;
+    }
+}
+
+construct {
+    spawn bad_repeat at (0, 0);
+}

@@ -7,6 +7,7 @@
 
 void yyerror(const char *s);
 int yylex(void);
+extern int yylineno;
 %}
 
 %code requires {
@@ -479,5 +480,5 @@ expr:
 %%
 
 void yyerror(const char *s) {
-	fprintf(stderr, "Parse error: %s\n", s);
+	fprintf(stderr, "Parse error at line %d: %s\n", yylineno, s);
 }

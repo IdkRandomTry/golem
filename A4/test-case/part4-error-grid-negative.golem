@@ -1,0 +1,9 @@
+grid(-1, 5) {}
+
+blueprint bad_grid {
+    go 1;
+}
+
+construct {
+    spawn bad_grid at (0, 0);
+}

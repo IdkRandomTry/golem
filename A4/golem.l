@@ -16,7 +16,7 @@ static void comment(void);
 extern void yyerror(const char *s);
 %}
 
-%option nounput
+%option nounput yylineno
 
 %%
 "/*"					{ comment(); }
@@ -87,10 +87,17 @@ static void comment(void)
     int c;
 
     while ((c = input()) != 0)
+    {
+        if (c == '\n')
+            ++yylineno;
+
         if (c == '*')
         {
             while ((c = input()) == '*')
                 ;
+
+            if (c == '\n')
+                ++yylineno;
 
             if (c == '/')
                 return;
@@ -98,6 +105,7 @@ static void comment(void)
             if (c == 0)
                 break; // EOF reached but comment not closed
         }
+    }
     yyerror("unterminated comment");
 }
 
