@@ -10,6 +10,7 @@ WS  [ \t\v\n\f]
 #include <string.h>
 #include "y.tab.h"
 #include "tokens.h"
+#include "ir.h"
 
 static void comment(void);
 extern void yyerror(const char *s);
@@ -101,7 +102,7 @@ static void comment(void)
 }
 
 int main(int argc, char **argv) {
-    FILE *input_file;
+    FILE *input_file = NULL;
 
     if (argc > 1) {
         input_file = fopen(argv[1], "r");
@@ -125,8 +126,12 @@ int main(int argc, char **argv) {
 
     if (result == 0) {
         printf("\n============\nParsing successful!\n");
+        print_ir();
+        free_ir();
+        printf("\n============\nIR generation complete!\n");
         return 0;
     } else {
+        free_ir();
         printf("\n============\nParsing failed!\n");
         return 1;
     }

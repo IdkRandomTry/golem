@@ -1,0 +1,12 @@
+grid(5, 5) {}
+
+blueprint expr_demo {
+    turn south;
+    go 2 + 3 * 4;
+    go (2 + 3) * 4;
+    go -5;
+}
+
+construct {
+    spawn expr_demo at (0, 0);
+}

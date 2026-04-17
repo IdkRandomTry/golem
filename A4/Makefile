@@ -18,7 +18,7 @@ all: $(TARGET)
 
 $(TARGET): y.tab.h
 	$(LEX) $(LEXER)
-	$(CC) $(CFLAGS) -o $(TARGET) lex.yy.c y.tab.c -ll
+	$(CC) $(CFLAGS) -o $(TARGET) lex.yy.c y.tab.c ir.c -ll
 
 y.tab.c y.tab.h: $(PARSER)
 	$(YACC) $(PARSER)
@@ -39,6 +39,12 @@ test: $(TARGET)
 	@echo 'grid(5,5) {} blueprint t3 { go -5; } construct { spawn t3 at (0,0); }' | ./$(TARGET)
 	@echo ""
 
+# Focused Stage 3 test (expressions only)
+part1-test: $(TARGET)
+	@echo "==== Stage 3 Simple Test ===="
+	@echo "Input: test-case/stage3-simple.golem"
+	./$(TARGET) < test-case/stage3-simple.golem
+
 clean:
 	rm -f $(TARGET) lex.yy.c y.tab.c y.tab.h
 
@@ -54,4 +60,4 @@ help:
 	@echo "  make help   - Show this message"
 	@echo ""
 
-.PHONY: all clean test help
+.PHONY: all clean test stage3-test help

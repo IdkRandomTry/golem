@@ -2,15 +2,26 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "ir.h"
+#include "helpers.h"
 
 void yyerror(const char *s);
 int yylex(void);
 %}
 
+%code requires {
+	typedef struct ExprAttr {
+		int val;
+		int is_const;
+		char *place;
+	} ExprAttr;
+}
+
 /* Semantic value type */
 %union {
 	int ival;
 	char *sval;
+	ExprAttr expr;
 }
 
 /* Token declarations */
@@ -27,7 +38,7 @@ int yylex(void);
 %token <sval> IDENTIFIER STRING_LITERAL
 
 /* Rule types */
-%type <ival> expr
+%type <expr> expr
 
 /* Operator precedence and associativity - FIXED FOR CONFLICTS */
 %left PLUS MINUS
@@ -54,11 +65,15 @@ statement:
 grid_decl:
 	GRID '(' expr ',' expr ')' '{' obstacle_list '}'
 	{
-		if ($3 < 0 || $5 < 0) {
+		if (!$3.is_const || !$5.is_const) {
+			yyerror("Grid dimensions must be constant integer expressions");
+			YYERROR;
+		}
+		if ($3.val < 0 || $5.val < 0) {
 			yyerror("Grid dimensions must be non-negative");
 			YYERROR;
 		}
-		printf("  Grid: %d x %d\n", $3, $5);
+		printf("  Grid: %d x %d\n", $3.val, $5.val);
 	}
 	;
 
@@ -69,11 +84,15 @@ obstacle_list:
 obstacle_stmt:
 	OBSTACLE '(' expr ',' expr ')' ';'
 	{
-		if ($3 < 0 || $5 < 0) {
+		if (!$3.is_const || !$5.is_const) {
+			yyerror("Obstacle coordinates must be constant integer expressions");
+			YYERROR;
+		}
+		if ($3.val < 0 || $5.val < 0) {
 			yyerror("Obstacle coordinates must be non-negative");
 			YYERROR;
 		}
-		printf("  Obstacle at (%d, %d)\n", $3, $5);
+		printf("  Obstacle at (%d, %d)\n", $3.val, $5.val);
 	}
 	;
 
@@ -95,19 +114,27 @@ spawn_list:
 spawn_stmt:
 	SPAWN IDENTIFIER AT '(' expr ',' expr ')' ';'
 	{
-		if ($5 < 0 || $7 < 0) {
+		if (!$5.is_const || !$7.is_const) {
+			yyerror("Spawn coordinates must be constant integer expressions");
+			YYERROR;
+		}
+		if ($5.val < 0 || $7.val < 0) {
 			yyerror("Spawn coordinates must be non-negative");
 			YYERROR;
 		}
-		printf("  Spawn '%s' at (%d, %d)\n", $2, $5, $7);
+		printf("  Spawn '%s' at (%d, %d)\n", $2, $5.val, $7.val);
 	}
 	| SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' ';'
 	{
-		if ($7 < 0 || $9 < 0) {
+		if (!$7.is_const || !$9.is_const) {
+			yyerror("Spawn coordinates must be constant integer expressions");
+			YYERROR;
+		}
+		if ($7.val < 0 || $9.val < 0) {
 			yyerror("Spawn coordinates must be non-negative");
 			YYERROR;
 		}
-		printf("  Spawn '%s' (alias '%s') at (%d, %d)\n", $2, $4, $7, $9);
+		printf("  Spawn '%s' (alias '%s') at (%d, %d)\n", $2, $4, $7.val, $9.val);
 	}
 	;
 
@@ -136,13 +163,16 @@ compound_stmt:
 movement_stmt:
 	GO expr ';'
 	{
-		if ($2 == 0) {
+		emit_quad("go", $2.place, NULL, NULL);
+		if (!$2.is_const) {
+			printf("    go %s;  (runtime expression)\n", $2.place);
+		} else if ($2.val == 0) {
 			printf("    go 0;  (no movement)\n");
-		} else if ($2 < 0) {
-			int steps = -$2;
+		} else if ($2.val < 0) {
+			int steps = -$2.val;
 			printf("    go -%d;  (turn 180°, move %d steps forward, face reversed direction)\n", steps, steps);
 		} else {
-			printf("    go %d;  (move %d steps forward)\n", $2, $2);
+			printf("    go %d;  (move %d steps forward)\n", $2.val, $2.val);
 		}
 	}
 	;
@@ -184,11 +214,16 @@ conditional_stmt:
 repetition_stmt:
 	REPEAT expr compound_stmt
 	{
-		if ($2 < 0) {
+		if (!$2.is_const) {
+			yyerror("Repeat count must be a constant integer expression");
+			YYERROR;
+		}
+		if ($2.val < 0) {
 			yyerror("Repeat count cannot be negative");
 			YYERROR;
 		}
-		printf("    repeat %d { ... }\n", $2);
+		emit_quad("repeat", $2.place, NULL, NULL);
+		printf("    repeat %d { ... }\n", $2.val);
 	}
 	| REPEAT compound_stmt
 	{
@@ -196,11 +231,16 @@ repetition_stmt:
 	}
 	| REPEAT expr ';'
 	{
-		if ($2 < 0) {
+		if (!$2.is_const) {
+			yyerror("Repeat count must be a constant integer expression");
+			YYERROR;
+		}
+		if ($2.val < 0) {
 			yyerror("Repeat count cannot be negative");
 			YYERROR;
 		}
-		printf("    repeat %d; (single iteration marker)\n", $2);
+		emit_quad("repeat_once", $2.place, NULL, NULL);
+		printf("    repeat %d; (single iteration marker)\n", $2.val);
 	}
 	;
 
@@ -233,39 +273,75 @@ direction:
 expr:
 	INTEGER
 	{
-		$$ = $1;
+		char *literal = int_to_string($1);
+		char *temp = new_temp();
+		emit_quad("=", literal, NULL, temp);
+		$$.val = $1;
+		$$.is_const = 1;
+		$$.place = temp;
+		free(literal);
+	}
+	| IDENTIFIER
+	{
+		$$.val = 0;
+		$$.is_const = 0;
+		$$.place = strdup($1);
 	}
 	| expr PLUS expr
 	{
-		$$ = $1 + $3;
+		char *temp = new_temp();
+		emit_quad("+", $1.place, $3.place, temp);
+		$$.is_const = $1.is_const && $3.is_const;
+		$$.val = $$.is_const ? ($1.val + $3.val) : 0;
+		$$.place = temp;
 	}
 	| expr MINUS expr
 	{
-		$$ = $1 - $3;
+		char *temp = new_temp();
+		emit_quad("-", $1.place, $3.place, temp);
+		$$.is_const = $1.is_const && $3.is_const;
+		$$.val = $$.is_const ? ($1.val - $3.val) : 0;
+		$$.place = temp;
 	}
 	| MINUS expr %prec UMINUS
 	{
-		$$ = -$2;
+		char *temp = new_temp();
+		emit_quad("uminus", $2.place, NULL, temp);
+		$$.is_const = $2.is_const;
+		$$.val = $2.is_const ? (-$2.val) : 0;
+		$$.place = temp;
 	}
 	| expr MULTIPLY expr
 	{
-		$$ = $1 * $3;
+		char *temp = new_temp();
+		emit_quad("*", $1.place, $3.place, temp);
+		$$.is_const = $1.is_const && $3.is_const;
+		$$.val = $$.is_const ? ($1.val * $3.val) : 0;
+		$$.place = temp;
 	}
 	| expr DIVIDE expr
 	{
-		if ($3 == 0) {
+		if ($3.is_const && $3.val == 0) {
 			yyerror("Division by zero");
 			YYERROR;
 		}
-		$$ = $1 / $3;
+		char *temp = new_temp();
+		emit_quad("/", $1.place, $3.place, temp);
+		$$.is_const = $1.is_const && $3.is_const;
+		$$.val = $$.is_const ? ($1.val / $3.val) : 0;
+		$$.place = temp;
 	}
 	| expr MODULO expr
 	{
-		if ($3 == 0) {
+		if ($3.is_const && $3.val == 0) {
 			yyerror("Modulo by zero");
 			YYERROR;
 		}
-		$$ = $1 % $3;
+		char *temp = new_temp();
+		emit_quad("%", $1.place, $3.place, temp);
+		$$.is_const = $1.is_const && $3.is_const;
+		$$.val = $$.is_const ? ($1.val % $3.val) : 0;
+		$$.place = temp;
 	}
 	| '(' expr ')'
 	{
