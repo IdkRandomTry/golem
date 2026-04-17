@@ -15,6 +15,7 @@ static char *ensure_program_end_label(void);
 static char *ensure_spawn_x_slot(void);
 static char *ensure_spawn_y_slot(void);
 static char *ensure_spawn_id_slot(void);
+static char *emit_direction_check(const char *direction, const char *scan_result, int invert_result);
 static void free_blueprint_labels(void);
 static int entry_jump_emitted = 0;
 
@@ -106,7 +107,7 @@ statement:
 	;
 
 grid_decl:
-	GRID '(' expr ',' expr ')' '{' obstacle_list '}'
+	GRID '(' expr ',' expr ')'
 	{
 		if (!$3.is_const || !$5.is_const) {
 			yyerror("Grid dimensions must be constant integer expressions");
@@ -118,6 +119,7 @@ grid_decl:
 		}
 		emit_quad("create_canvas", $3.place, $5.place, NULL);
 	}
+	'{' obstacle_list '}'
 	;
 
 obstacle_list:
@@ -135,6 +137,7 @@ obstacle_stmt:
 			yyerror("Obstacle coordinates must be non-negative");
 			YYERROR;
 		}
+		emit_quad("load_obstacle", $3.place, $5.place, NULL);
 	}
 	;
 
@@ -277,7 +280,7 @@ repeat_prefix:
 		char *count_text = int_to_string($2.val);
 		emit_quad("=", count_text, NULL, ctrl.counter_place);
 		emit_quad("label", NULL, NULL, ctrl.start_label);
-		emit_quad("if_eq_zero", ctrl.counter_place, NULL, ctrl.end_label);
+		emit_quad("if_eq", ctrl.counter_place, "0", ctrl.end_label);
 		free(count_text);
 
 		$$ = ctrl;
@@ -296,14 +299,24 @@ repeat_inf_prefix:
 movement_stmt:
 	GO expr ';'
 	{
-		emit_quad("go", $2.place, NULL, NULL);
+		emit_quad("go", ensure_spawn_id_slot(), $2.place, NULL);
 	}
 	;
 
 rotation_stmt:
 	TURN direction ';'
 	{
-		emit_quad("turn", $2, NULL, NULL);
+		const char *angle = "0";
+		if (strcmp($2, "north") == 0) {
+			angle = "0";
+		} else if (strcmp($2, "east") == 0) {
+			angle = "90";
+		} else if (strcmp($2, "south") == 0) {
+			angle = "180";
+		} else if (strcmp($2, "west") == 0) {
+			angle = "270";
+		}
+		emit_quad("rot_golem", ensure_spawn_id_slot(), angle, NULL);
 		free($2);
 	}
 	;
@@ -386,16 +399,14 @@ condition:
 	}
 	| directional_scan EQ_OP scan_result
 	{
-		char *temp = new_temp();
-		emit_quad("cond_dir_eq", $1, $3, temp);
+		char *temp = emit_direction_check($1, $3, 0);
 		free($1);
 		free($3);
 		$$ = temp;
 	}
 	| directional_scan NE_OP scan_result
 	{
-		char *temp = new_temp();
-		emit_quad("cond_dir_ne", $1, $3, temp);
+		char *temp = emit_direction_check($1, $3, 1);
 		free($1);
 		free($3);
 		$$ = temp;
@@ -625,4 +636,50 @@ static void free_blueprint_labels(void) {
 		free(spawn_id_slot);
 		spawn_id_slot = NULL;
 	}
+}
+
+static char *emit_direction_check(const char *direction, const char *scan_result, int invert_result) {
+	char *base_x = ensure_spawn_x_slot();
+	char *base_y = ensure_spawn_y_slot();
+	char *target_x = strdup(base_x);
+	char *target_y = strdup(base_y);
+	char *offset = int_to_string(1);
+
+	if (strcmp(direction, ">>") == 0) {
+		char *tmp = new_temp();
+		emit_quad("+", base_x, offset, tmp);
+		free(target_x);
+		target_x = tmp;
+	} else if (strcmp(direction, "<<") == 0) {
+		char *tmp = new_temp();
+		emit_quad("-", base_x, offset, tmp);
+		free(target_x);
+		target_x = tmp;
+	} else if (strcmp(direction, "^^") == 0) {
+		char *tmp = new_temp();
+		emit_quad("-", base_y, offset, tmp);
+		free(target_y);
+		target_y = tmp;
+	} else if (strcmp(direction, "vv") == 0) {
+		char *tmp = new_temp();
+		emit_quad("+", base_y, offset, tmp);
+		free(target_y);
+		target_y = tmp;
+	}
+
+	char *check_temp = new_temp();
+	emit_quad("check_empty", target_x, target_y, check_temp);
+
+	char *result_temp = check_temp;
+	int scan_is_empty = strcmp(scan_result, "empty") == 0;
+	if ((scan_is_empty && invert_result) || (!scan_is_empty && !invert_result)) {
+		char *inverted_temp = new_temp();
+		emit_quad("not", check_temp, NULL, inverted_temp);
+		result_temp = inverted_temp;
+	}
+
+	free(target_x);
+	free(target_y);
+	free(offset);
+	return result_temp;
 }

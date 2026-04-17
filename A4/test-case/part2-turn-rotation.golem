@@ -1,0 +1,15 @@
+grid(6, 6) {
+    obstacle(2, 2);
+}
+
+blueprint turn_demo {
+    turn east;
+    go 1;
+    turn south;
+    go 2;
+    turn west;
+}
+
+construct {
+    spawn turn_demo at (1, 1);
+}

@@ -1,4 +1,6 @@
-grid(5, 5) {}
+grid(5, 5) {
+    obstacle(1, 2);
+}
 
 blueprint control_demo {
     repeat 2 {

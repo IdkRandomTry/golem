@@ -1,0 +1,12 @@
+grid(9, 9) {}
+
+blueprint expr_assoc {
+    go 10 - 3 - 2;
+    go (10 - 3) - 2;
+    go 8 / 2 * 3;
+    go 8 / (2 * 2);
+}
+
+construct {
+    spawn expr_assoc at (1, 1);
+}

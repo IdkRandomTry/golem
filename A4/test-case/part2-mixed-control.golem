@@ -1,0 +1,21 @@
+grid(10, 10) {
+    obstacle(4, 4);
+}
+
+blueprint control_mixed {
+    if (>> != obstacle) {
+        repeat 3 {
+            turn east;
+            go 1;
+        }
+    } else {
+        repeat 2 {
+            turn south;
+            go 2;
+        }
+    }
+}
+
+construct {
+    spawn control_mixed at (3, 3);
+}

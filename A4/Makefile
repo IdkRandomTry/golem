@@ -26,19 +26,21 @@ y.tab.c y.tab.h: $(PARSER)
 lex.yy.c: $(LEXER) y.tab.h
 	$(LEX) $(LEXER)
 
-# Run all 10 tests (Part 1 + Part 2 + Part 4)
+# Run all 15 tests (Part 1 + Part 2 + Part 4)
 test: test-part1 test-part2 test-part4
 	@echo ""
-	@echo "==== All 10 tests completed ===="
+	@echo "==== All 15 tests completed ===="
 
 # Run all Part 1 tests (valid expression/codegen tests)
 test-part1: $(TARGET)
-	@echo "==== Part 1 Tests (3 files) ===="
+	@echo "==== Part 1 Tests (5 files) ===="
 	@status=0; \
 	for f in \
 		test-case/part1-simple.golem \
 		test-case/part1-precedence-nested.golem \
-		test-case/part1-modulo-unary.golem; do \
+		test-case/part1-modulo-unary.golem \
+		test-case/part1-associativity-mix.golem \
+		test-case/part1-expr-simple-branch.golem; do \
 			echo ""; \
 			echo "Input: $$f"; \
 			./$(TARGET) < $$f || status=1; \
@@ -47,12 +49,14 @@ test-part1: $(TARGET)
 
 # Run all Part 2 tests (valid control-flow/codegen tests)
 test-part2: $(TARGET)
-	@echo "==== Part 2 Tests (3 files) ===="
+	@echo "==== Part 2 Tests (5 files) ===="
 	@status=0; \
 	for f in \
 		test-case/part2-control.golem \
 		test-case/part2-nested-repeat-if.golem \
-		test-case/part2-branch-with-repeat.golem; do \
+		test-case/part2-branch-with-repeat.golem \
+		test-case/part2-turn-rotation.golem \
+		test-case/part2-mixed-control.golem; do \
 			echo ""; \
 			echo "Input: $$f"; \
 			./$(TARGET) < $$f || status=1; \
@@ -61,13 +65,14 @@ test-part2: $(TARGET)
 
 # Run all Part 4 tests (error diagnostics, expected failures)
 test-part4: $(TARGET)
-	@echo "==== Part 4 Tests (4 files, expected parse failures) ===="
+	@echo "==== Part 4 Tests (5 files, expected parse failures) ===="
 	@status=0; \
 	for f in \
 		test-case/part4-error-grid-negative.golem \
 		test-case/part4-error-repeat-negative.golem \
 		test-case/part4-error-div-zero.golem \
-		test-case/part4-error-syntax-missing-semicolon.golem; do \
+		test-case/part4-error-syntax-missing-semicolon.golem \
+		test-case/part4-error-undefined-blueprint.golem; do \
 			echo ""; \
 			echo "Input: $$f"; \
 			./$(TARGET) < $$f; \
@@ -90,10 +95,10 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  make        - Build A4 parser"
-	@echo "  make test       - Run all 10 tests"
-	@echo "  make test-part1 - Run all Part 1 tests (3)"
-	@echo "  make test-part2 - Run all Part 2 tests (3)"
-	@echo "  make test-part4 - Run all Part 4 tests (4, expected failures)"
+	@echo "  make test       - Run all 15 tests"
+	@echo "  make test-part1 - Run all Part 1 tests (5)"
+	@echo "  make test-part2 - Run all Part 2 tests (5)"
+	@echo "  make test-part4 - Run all Part 4 tests (5, expected failures)"
 	@echo "  make clean  - Remove build artifacts"
 	@echo "  make help   - Show this message"
 	@echo ""

@@ -1,0 +1,5 @@
+grid(5, 5) {}
+
+construct {
+    spawn ghost_blueprint at (1, 1);
+}

@@ -1,0 +1,14 @@
+grid(7, 7) {}
+
+blueprint expr_branch {
+    if (>> == empty) {
+        go 1 + 2 * 3;
+    } else {
+        go (1 + 2) * 3;
+    }
+    go -4 + 10 % 3;
+}
+
+construct {
+    spawn expr_branch at (2, 2);
+}
