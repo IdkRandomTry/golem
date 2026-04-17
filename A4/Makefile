@@ -42,8 +42,8 @@ test: $(TARGET)
 # Focused Stage 3 test (expressions only)
 part1-test: $(TARGET)
 	@echo "==== Stage 3 Simple Test ===="
-	@echo "Input: test-case/stage3-simple.golem"
-	./$(TARGET) < test-case/stage3-simple.golem
+	@echo "Input: test-case/part1-simple.golem"
+	./$(TARGET) < test-case/part1-simple.golem
 
 # Focused Stage 4 test (control flow)
 part2-test: $(TARGET)
