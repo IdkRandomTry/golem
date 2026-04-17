@@ -1,0 +1,15 @@
+grid(7, 7) {}
+
+blueprint control_nested {
+    repeat 3 {
+        if (scan(east?) == empty) {
+            go 1;
+        } else {
+            go 2;
+        }
+    }
+}
+
+construct {
+    spawn control_nested at (0, 0);
+}

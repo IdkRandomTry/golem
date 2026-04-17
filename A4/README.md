@@ -1,7 +1,5 @@
 # A4: Intermediate Code Generation (Quadruples)
 
-This folder is your complete working directory for A4 - Intermediate Code Generation.
-
 ## Folder Structure
 
 ```
@@ -22,50 +20,7 @@ A4/
     └── ...
 ```
 
-## Quick Start
-
-1. **Build the parser:**
-   ```bash
-   cd A4
-   make clean && make
-   ```
-
-2. **Run tests:**
-   ```bash
-   make test
-   ```
-
-3. **Test a specific input:**
-   ```bash
-   ./golem < test-case/spawn-and-move.golem
-   ```
-
-## Work Plan (from todo-sidd.md)
-
-You're implementing IR generation in 10 stages:
-
-1. ✓ Baseline Check (verify current parser works)
-2. → Add IR Core Data Structures (quad struct, temp/label gen)
-3. → Expression IR (operators, precedence)
-4. → Statement-Level IR
-5. → Control Flow IR (if, repeat, labels)
-6. → Output Formatting (tabular quadruples)
-7. → Diagnostics (error handling during codegen)
-8. → 10 Demo Programs (required test suite)
-9. → Regression Testing
-10. → Final Submission
-
-See `todo-sidd.md` for detailed step-by-step instructions and testing tips.
-
-## Key Files You'll Modify
-
-- **golem.y** - Add IR emission actions to parser rules
-- **golem.l** - Keep minimal changes (lexer is complete)
-- **tokens.h** - May add IR/quad related tokens if needed
-
-## Expected IR Output Format
-
-Per assignment spec (A4.md), your output should be:
+## IR Output Format
 
 ```
 Source Program:
@@ -81,49 +36,64 @@ Generated Intermediate Code (3AC Quadruples):
 ...
 ```
 
-## Assignment Requirements (from a4.md)
+## Suggested Steps for Verification
 
-- **Part 1 (7 marks):** Arithmetic expressions in quadruple format
-- **Part 2 (7 marks):** Control flow (if, if-else, repeat, labels)
-- **Part 3 (3 marks):** Tabular output format
-- **Part 4 (3 marks):** Error diagnostics
-- **Bonus:** 10 demo programs showing all features
+1. Build from a clean state:
 
-## Testing Your Work
+```bash
+make clean && make
+```
 
-As you implement each stage:
+2. Verify expression IR (Part 1):
 
-1. **Unit test** - Test one feature at a time (one operator, one control struct)
-2. **Integration test** - Combine features (nested if in repeat)
-3. **End-to-end** - Run all 10 demo programs
-4. **Regression** - Verify Q1-Q5 still work (use root directory for this)
+```bash
+make part1-test
+```
 
-## Debugging Tips
+3. Verify control-flow IR (Part 2):
 
-- Compile with `-g` (already in Makefile)
-- Use `gdb` to step through parser actions
-- Print intermediate quads as they're emitted
-- Validate quad numbering is sequential
-- Check temp/label counter uniqueness
+```bash
+make part2-test
+```
 
-## File References
+4. Verify diagnostics with line numbers (Part 4):
 
-- Assignment spec: `a4.md`
-- Previous work spec: `Makefile.root` (Q1-Q5 targets still available in root)
-- Language spec: `../README.md`
-- Grammar status: `../Q6_Additional_Info/README.md`
+```bash
+make part4-test
+```
 
-## Submission Checklist
+5. Check output quality (Part 3):
+- IR is printed row-by-row.
+- Temporary names are readable (`t1`, `t2`, ...).
+- Labels and jumps are visible for control flow.
+- Errors are reported as `Parse error at line N: ...`.
 
-Before submitting from A4/:
 
-- [ ] All 10 demo programs present
-- [ ] Each demo has corresponding IR output
-- [ ] Quadruple format is consistent and readable
-- [ ] Error handling works on malformed input
-- [ ] Documentation in `a4.md` is complete
-- [ ] Team member contributions are documented
+## End to End Implementation Details
+
+1. Lexing:
+- `golem.l` tokenizes source code into keywords, operators, punctuation, literals, and identifiers.
+
+2. Parsing + SDT:
+- `golem.y` parses grammar rules and emits IR during reductions.
+- Expression rules emit quadruples for `+`, `-`, `*`, `/`, `%`, unary minus, and assignment-like value moves.
+
+3. IR core:
+- `ir.c` stores quadruples in insertion order.
+- `new_temp()` and `new_label()` generate unique temporaries and labels.
+- `emit_quad(op, arg1, arg2, result)` appends one 3AC row.
+
+4. Control flow lowering:
+- `if` and `if-else` generate condition checks, `if_false_goto`, `goto`, and `label` quads.
+- `repeat` generates loop start/end labels, zero-check, decrement, and back-edge jump.
+
+5. Diagnostics and safety:
+- Semantic checks include negative dimensions/coordinates, negative repeat counts, divide-by-zero, and modulo-by-zero.
+- Syntax and semantic diagnostics are printed with line numbers.
+- On error, parser exits cleanly without crashing.
+
+6. Output stage:
+- On successful parse, quadruples are printed in tabular format.
+- On failure, diagnostics are printed and allocated IR is cleaned up.
 
 ---
-
-**Start working:** Read `todo-sidd.md`, then implement stage 2 (IR Core Data Structures) in `golem.y`.

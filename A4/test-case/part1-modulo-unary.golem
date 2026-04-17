@@ -1,0 +1,10 @@
+grid(6, 6) {}
+
+blueprint expr_mod_unary {
+    go 17 % 5;
+    go -(2 + 3) * 2;
+}
+
+construct {
+    spawn expr_mod_unary at (2, 2);
+}

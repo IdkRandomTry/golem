@@ -26,35 +26,43 @@ y.tab.c y.tab.h: $(PARSER)
 lex.yy.c: $(LEXER) y.tab.h
 	$(LEX) $(LEXER)
 
-# Run basic test suite
-test: $(TARGET)
-	@echo "==== A4 Testing: Expression IR ===="
-	@echo "Test 1: Simple addition"
-	@echo 'grid(5,5) {} blueprint t1 { go 1 + 2; } construct { spawn t1 at (0,0); }' | ./$(TARGET)
+# Run all 10 tests (Part 1 + Part 2 + Part 4)
+test: test-part1 test-part2 test-part4
 	@echo ""
-	@echo "Test 2: Precedence (mult before add)"
-	@echo 'grid(5,5) {} blueprint t2 { go 2 + 3 * 4; } construct { spawn t2 at (0,0); }' | ./$(TARGET)
-	@echo ""
-	@echo "Test 3: Unary minus"
-	@echo 'grid(5,5) {} blueprint t3 { go -5; } construct { spawn t3 at (0,0); }' | ./$(TARGET)
-	@echo ""
+	@echo "==== All 10 tests completed ===="
 
-# Focused Stage 3 test (expressions only)
-part1-test: $(TARGET)
-	@echo "==== Stage 3 Simple Test ===="
-	@echo "Input: test-case/part1-simple.golem"
-	./$(TARGET) < test-case/part1-simple.golem
+# Run all Part 1 tests (valid expression/codegen tests)
+test-part1: $(TARGET)
+	@echo "==== Part 1 Tests (3 files) ===="
+	@status=0; \
+	for f in \
+		test-case/part1-simple.golem \
+		test-case/part1-precedence-nested.golem \
+		test-case/part1-modulo-unary.golem; do \
+			echo ""; \
+			echo "Input: $$f"; \
+			./$(TARGET) < $$f || status=1; \
+		done; \
+	exit $$status
 
-# Focused Stage 4 test (control flow)
-part2-test: $(TARGET)
-	@echo "==== Stage 4 Control-Flow Test ===="
-	@echo "Input: test-case/part2-control.golem"
-	./$(TARGET) < test-case/part2-control.golem
+# Run all Part 2 tests (valid control-flow/codegen tests)
+test-part2: $(TARGET)
+	@echo "==== Part 2 Tests (3 files) ===="
+	@status=0; \
+	for f in \
+		test-case/part2-control.golem \
+		test-case/part2-nested-repeat-if.golem \
+		test-case/part2-branch-with-repeat.golem; do \
+			echo ""; \
+			echo "Input: $$f"; \
+			./$(TARGET) < $$f || status=1; \
+		done; \
+	exit $$status
 
-# Focused Part 4 tests (error diagnostics)
-part4-test: $(TARGET)
-	@echo "==== Part 4 Error Diagnostics Tests ===="
-	@set +e; \
+# Run all Part 4 tests (error diagnostics, expected failures)
+test-part4: $(TARGET)
+	@echo "==== Part 4 Tests (4 files, expected parse failures) ===="
+	@status=0; \
 	for f in \
 		test-case/part4-error-grid-negative.golem \
 		test-case/part4-error-repeat-negative.golem \
@@ -63,8 +71,14 @@ part4-test: $(TARGET)
 			echo ""; \
 			echo "Input: $$f"; \
 			./$(TARGET) < $$f; \
-			echo "Exit code: $$?"; \
-		done
+			ec=$$?; \
+			echo "Exit code: $$ec"; \
+			if [ $$ec -eq 0 ]; then \
+				echo "[FAIL] Expected non-zero exit for diagnostic test"; \
+				status=1; \
+			fi; \
+		done; \
+	exit $$status
 
 clean:
 	rm -f $(TARGET) lex.yy.c y.tab.c y.tab.h
@@ -76,12 +90,12 @@ help:
 	@echo ""
 	@echo "Targets:"
 	@echo "  make        - Build A4 parser"
-	@echo "  make test   - Run test suite"
-	@echo "  make part1-test - Run focused Stage 3 expression test"
-	@echo "  make part2-test - Run focused Stage 4 control-flow test"
-	@echo "  make part4-test - Run focused Part 4 diagnostics tests"
+	@echo "  make test       - Run all 10 tests"
+	@echo "  make test-part1 - Run all Part 1 tests (3)"
+	@echo "  make test-part2 - Run all Part 2 tests (3)"
+	@echo "  make test-part4 - Run all Part 4 tests (4, expected failures)"
 	@echo "  make clean  - Remove build artifacts"
 	@echo "  make help   - Show this message"
 	@echo ""
 
-.PHONY: all clean test stage3-test part1-test part2-test part4-test help
+.PHONY: all clean test test-part1 test-part2 test-part4 help

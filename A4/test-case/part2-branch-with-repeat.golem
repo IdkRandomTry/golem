@@ -1,0 +1,17 @@
+grid(8, 8) {}
+
+blueprint control_branch_loop {
+    if (>> == obstacle) {
+        repeat 2 {
+            go 1;
+        }
+    } else {
+        repeat 2 {
+            go 3;
+        }
+    }
+}
+
+construct {
+    spawn control_branch_loop at (3, 3);
+}

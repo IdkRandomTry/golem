@@ -1,0 +1,10 @@
+grid(6, 6) {}
+
+blueprint expr_precedence {
+    go (1 + 2) * (3 + 4);
+    go 20 - 3 * 2 + 1;
+}
+
+construct {
+    spawn expr_precedence at (1, 1);
+}
