@@ -8,6 +8,28 @@
 void yyerror(const char *s);
 int yylex(void);
 extern int yylineno;
+static char *lookup_blueprint_label(const char *name);
+static void register_blueprint_label(const char *name, const char *label);
+static char *ensure_construct_entry_label(void);
+static char *ensure_program_end_label(void);
+static char *ensure_spawn_x_slot(void);
+static char *ensure_spawn_y_slot(void);
+static char *ensure_spawn_id_slot(void);
+static void free_blueprint_labels(void);
+static int entry_jump_emitted = 0;
+
+typedef struct BlueprintLabel {
+	char *name;
+	char *label;
+	struct BlueprintLabel *next;
+} BlueprintLabel;
+
+static BlueprintLabel *blueprint_labels = NULL;
+static char *construct_entry_label = NULL;
+static char *program_end_label = NULL;
+static char *spawn_x_slot = NULL;
+static char *spawn_y_slot = NULL;
+static char *spawn_id_slot = NULL;
 %}
 
 %code requires {
@@ -49,6 +71,7 @@ extern int yylineno;
 /* Rule types */
 %type <expr> expr
 %type <sval> condition directional_scan scan_result direction repeat_inf_prefix
+%type <sval> blueprint_header
 %type <ctrl> if_prefix repeat_prefix
 
 /* Operator precedence and associativity - FIXED FOR CONFLICTS */
@@ -61,6 +84,15 @@ extern int yylineno;
 %nonassoc ELSE
 
 %%
+
+translation_unit:
+	program
+	{
+		emit_quad("label", NULL, NULL, ensure_program_end_label());
+		free_blueprint_labels();
+		entry_jump_emitted = 0;
+	}
+	;
 
 program:
 	| program statement
@@ -84,6 +116,7 @@ grid_decl:
 			yyerror("Grid dimensions must be non-negative");
 			YYERROR;
 		}
+		emit_quad("create_canvas", $3.place, $5.place, NULL);
 	}
 	;
 
@@ -106,12 +139,38 @@ obstacle_stmt:
 	;
 
 blueprint_decl:
-	BLUEPRINT IDENTIFIER '{' stmt_list '}'
-	{}
+	blueprint_header '{' stmt_list '}'
+	{
+		emit_quad("goto", NULL, NULL, ensure_program_end_label());
+		free($1);
+	}
+	;
+
+blueprint_header:
+	BLUEPRINT IDENTIFIER
+	{
+		if (!entry_jump_emitted) {
+			emit_quad("goto", NULL, NULL, ensure_construct_entry_label());
+			entry_jump_emitted = 1;
+		}
+
+		char *bp_label = new_label();
+		register_blueprint_label($2, bp_label);
+		emit_quad("label", NULL, NULL, bp_label);
+		emit_quad("load_golem", ensure_spawn_x_slot(), ensure_spawn_y_slot(), ensure_spawn_id_slot());
+		$$ = bp_label;
+	}
 	;
 
 construct_decl:
-	CONSTRUCT '{' spawn_list '}'
+	CONSTRUCT
+	{
+		emit_quad("label", NULL, NULL, ensure_construct_entry_label());
+	}
+	'{' spawn_list '}'
+	{
+		emit_quad("goto", NULL, NULL, ensure_program_end_label());
+	}
 	;
 
 spawn_list:
@@ -129,6 +188,16 @@ spawn_stmt:
 			yyerror("Spawn coordinates must be non-negative");
 			YYERROR;
 		}
+
+		char *bp_label = lookup_blueprint_label($2);
+		if (!bp_label) {
+			yyerror("Spawn references undefined blueprint");
+			YYERROR;
+		}
+
+		emit_quad("=", $5.place, NULL, ensure_spawn_x_slot());
+		emit_quad("=", $7.place, NULL, ensure_spawn_y_slot());
+		emit_quad("goto", NULL, NULL, bp_label);
 	}
 	| SPAWN IDENTIFIER AS IDENTIFIER AT '(' expr ',' expr ')' ';'
 	{
@@ -140,6 +209,16 @@ spawn_stmt:
 			yyerror("Spawn coordinates must be non-negative");
 			YYERROR;
 		}
+
+		char *bp_label = lookup_blueprint_label($2);
+		if (!bp_label) {
+			yyerror("Spawn references undefined blueprint");
+			YYERROR;
+		}
+
+		emit_quad("=", $7.place, NULL, ensure_spawn_x_slot());
+		emit_quad("=", $9.place, NULL, ensure_spawn_y_slot());
+		emit_quad("goto", NULL, NULL, bp_label);
 	}
 	;
 
@@ -223,7 +302,10 @@ movement_stmt:
 
 rotation_stmt:
 	TURN direction ';'
-	{}
+	{
+		emit_quad("turn", $2, NULL, NULL);
+		free($2);
+	}
 	;
 
 pick_stmt:
@@ -452,4 +534,95 @@ expr:
 
 void yyerror(const char *s) {
 	fprintf(stderr, "Parse error at line %d: %s\n", yylineno, s);
+}
+
+static char *lookup_blueprint_label(const char *name) {
+	BlueprintLabel *node = blueprint_labels;
+	while (node) {
+		if (strcmp(node->name, name) == 0) {
+			return node->label;
+		}
+		node = node->next;
+	}
+	return NULL;
+}
+
+static void register_blueprint_label(const char *name, const char *label) {
+	BlueprintLabel *node = (BlueprintLabel *)malloc(sizeof(BlueprintLabel));
+	node->name = strdup(name);
+	node->label = strdup(label);
+	node->next = blueprint_labels;
+	blueprint_labels = node;
+}
+
+static char *ensure_construct_entry_label(void) {
+	if (!construct_entry_label) {
+		construct_entry_label = new_label();
+	}
+	return construct_entry_label;
+}
+
+static char *ensure_program_end_label(void) {
+	if (!program_end_label) {
+		program_end_label = new_label();
+	}
+	return program_end_label;
+}
+
+static char *ensure_spawn_x_slot(void) {
+	if (!spawn_x_slot) {
+		spawn_x_slot = new_temp();
+	}
+	return spawn_x_slot;
+}
+
+static char *ensure_spawn_y_slot(void) {
+	if (!spawn_y_slot) {
+		spawn_y_slot = new_temp();
+	}
+	return spawn_y_slot;
+}
+
+static char *ensure_spawn_id_slot(void) {
+	if (!spawn_id_slot) {
+		spawn_id_slot = new_temp();
+	}
+	return spawn_id_slot;
+}
+
+static void free_blueprint_labels(void) {
+	BlueprintLabel *node = blueprint_labels;
+	while (node) {
+		BlueprintLabel *next = node->next;
+		free(node->name);
+		free(node->label);
+		free(node);
+		node = next;
+	}
+	blueprint_labels = NULL;
+
+	if (construct_entry_label) {
+		free(construct_entry_label);
+		construct_entry_label = NULL;
+	}
+
+	if (program_end_label) {
+		free(program_end_label);
+		program_end_label = NULL;
+	}
+
+	if (spawn_x_slot) {
+		free(spawn_x_slot);
+		spawn_x_slot = NULL;
+	}
+
+	if (spawn_y_slot) {
+		free(spawn_y_slot);
+		spawn_y_slot = NULL;
+	}
+
+	if (spawn_id_slot) {
+		free(spawn_id_slot);
+		spawn_id_slot = NULL;
+	}
 }
