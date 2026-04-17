@@ -15,6 +15,13 @@ int yylex(void);
 		int is_const;
 		char *place;
 	} ExprAttr;
+
+	typedef struct ControlAttr {
+		char *start_label;
+		char *false_label;
+		char *end_label;
+		char *counter_place;
+	} ControlAttr;
 }
 
 /* Semantic value type */
@@ -22,6 +29,7 @@ int yylex(void);
 	int ival;
 	char *sval;
 	ExprAttr expr;
+	ControlAttr ctrl;
 }
 
 /* Token declarations */
@@ -39,6 +47,8 @@ int yylex(void);
 
 /* Rule types */
 %type <expr> expr
+%type <sval> condition directional_scan scan_result direction repeat_inf_prefix
+%type <ctrl> if_prefix repeat_prefix
 
 /* Operator precedence and associativity - FIXED FOR CONFLICTS */
 %left PLUS MINUS
@@ -160,6 +170,57 @@ compound_stmt:
 	}
 	;
 
+if_prefix:
+	IF '(' condition ')'
+	{
+		ControlAttr ctrl;
+		ctrl.start_label = NULL;
+		ctrl.false_label = new_label();
+		ctrl.end_label = new_label();
+		ctrl.counter_place = NULL;
+		emit_quad("if_false_goto", $3, NULL, ctrl.false_label);
+		free($3);
+		$$ = ctrl;
+	}
+	;
+
+repeat_prefix:
+	REPEAT expr
+	{
+		if (!$2.is_const) {
+			yyerror("Repeat count must be a constant integer expression");
+			YYERROR;
+		}
+		if ($2.val < 0) {
+			yyerror("Repeat count cannot be negative");
+			YYERROR;
+		}
+
+		ControlAttr ctrl;
+		ctrl.start_label = new_label();
+		ctrl.false_label = NULL;
+		ctrl.end_label = new_label();
+		ctrl.counter_place = new_temp();
+
+		char *count_text = int_to_string($2.val);
+		emit_quad("=", count_text, NULL, ctrl.counter_place);
+		emit_quad("label", NULL, NULL, ctrl.start_label);
+		emit_quad("if_eq_zero", ctrl.counter_place, NULL, ctrl.end_label);
+		free(count_text);
+
+		$$ = ctrl;
+	}
+	;
+
+repeat_inf_prefix:
+	REPEAT
+	{
+		char *start_label = new_label();
+		emit_quad("label", NULL, NULL, start_label);
+		$$ = start_label;
+	}
+	;
+
 movement_stmt:
 	GO expr ';'
 	{
@@ -198,35 +259,43 @@ drop_stmt:
 	}
 	;
 
-/* FIXED: Added %prec THEN to resolve dangling else */
 conditional_stmt:
-	IF '(' condition ')' stmt %prec THEN
+	if_prefix stmt %prec THEN
 	{
+		emit_quad("label", NULL, NULL, $1.false_label);
+		emit_quad("label", NULL, NULL, $1.end_label);
+		free($1.false_label);
+		free($1.end_label);
 		printf("    if (...) stmt\n");
 	}
-	| IF '(' condition ')' stmt ELSE stmt
+	| if_prefix stmt ELSE
 	{
+		emit_quad("goto", NULL, NULL, $1.end_label);
+		emit_quad("label", NULL, NULL, $1.false_label);
+	} stmt
+	{
+		emit_quad("label", NULL, NULL, $1.end_label);
+		free($1.false_label);
+		free($1.end_label);
 		printf("    if (...) stmt else stmt\n");
 	}
 	;
 
-/* FIXED: Separated productions to avoid R/R conflict */
 repetition_stmt:
-	REPEAT expr compound_stmt
+	repeat_prefix compound_stmt
 	{
-		if (!$2.is_const) {
-			yyerror("Repeat count must be a constant integer expression");
-			YYERROR;
-		}
-		if ($2.val < 0) {
-			yyerror("Repeat count cannot be negative");
-			YYERROR;
-		}
-		emit_quad("repeat", $2.place, NULL, NULL);
-		printf("    repeat %d { ... }\n", $2.val);
+		emit_quad("sub", $1.counter_place, "1", $1.counter_place);
+		emit_quad("goto", NULL, NULL, $1.start_label);
+		emit_quad("label", NULL, NULL, $1.end_label);
+		free($1.start_label);
+		free($1.end_label);
+		free($1.counter_place);
+		printf("    repeat { ... }\n");
 	}
-	| REPEAT compound_stmt
+	| repeat_inf_prefix compound_stmt
 	{
+		emit_quad("goto", NULL, NULL, $1);
+		free($1);
 		printf("    repeat (infinite) { ... }\n");
 	}
 	| REPEAT expr ';'
@@ -246,28 +315,86 @@ repetition_stmt:
 
 condition:
 	SCAN '(' direction '?' ')' EQ_OP scan_result
+	{
+		char *temp = new_temp();
+		emit_quad("cond_scan_eq", $3, $7, temp);
+		free($3);
+		free($7);
+		$$ = temp;
+	}
 	| SCAN '(' direction '?' ')' NE_OP scan_result
+	{
+		char *temp = new_temp();
+		emit_quad("cond_scan_ne", $3, $7, temp);
+		free($3);
+		free($7);
+		$$ = temp;
+	}
 	| directional_scan EQ_OP scan_result
+	{
+		char *temp = new_temp();
+		emit_quad("cond_dir_eq", $1, $3, temp);
+		free($1);
+		free($3);
+		$$ = temp;
+	}
 	| directional_scan NE_OP scan_result
+	{
+		char *temp = new_temp();
+		emit_quad("cond_dir_ne", $1, $3, temp);
+		free($1);
+		free($3);
+		$$ = temp;
+	}
 	;
 
 directional_scan:
 	EAST_SCAN
+	{
+		$$ = strdup(">>");
+	}
 	| WEST_SCAN
+	{
+		$$ = strdup("<<");
+	}
 	| NORTH_SCAN
+	{
+		$$ = strdup("^^");
+	}
 	| SOUTH_SCAN
+	{
+		$$ = strdup("vv");
+	}
 	;
 
 scan_result:
 	OBSTACLE
+	{
+		$$ = strdup("obstacle");
+	}
 	| EMPTY
+	{
+		$$ = strdup("empty");
+	}
 	;
 
 direction:
 	NORTH
+	{
+		$$ = strdup("north");
+	}
 	| SOUTH
+	{
+		$$ = strdup("south");
+	}
 	| EAST
+	{
+		$$ = strdup("east");
+	}
 	| WEST
+	{
+		$$ = strdup("west");
+	}
 	;
 
 expr:

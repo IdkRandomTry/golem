@@ -45,6 +45,12 @@ part1-test: $(TARGET)
 	@echo "Input: test-case/stage3-simple.golem"
 	./$(TARGET) < test-case/stage3-simple.golem
 
+# Focused Stage 4 test (control flow)
+part2-test: $(TARGET)
+	@echo "==== Stage 4 Control-Flow Test ===="
+	@echo "Input: test-case/part2-control.golem"
+	./$(TARGET) < test-case/part2-control.golem
+
 clean:
 	rm -f $(TARGET) lex.yy.c y.tab.c y.tab.h
 
@@ -60,4 +66,4 @@ help:
 	@echo "  make help   - Show this message"
 	@echo ""
 
-.PHONY: all clean test stage3-test help
+.PHONY: all clean test stage3-test part1-test part2-test help

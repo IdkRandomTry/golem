@@ -1,0 +1,17 @@
+grid(5, 5) {}
+
+blueprint control_demo {
+    repeat 2 {
+        go 1;
+    }
+
+    if (scan(east?) == empty) {
+        go 3;
+    } else {
+        go 4;
+    }
+}
+
+construct {
+    spawn control_demo at (0, 0);
+}
